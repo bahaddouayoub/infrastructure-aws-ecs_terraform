@@ -1,6 +1,4 @@
 region = "us-east-1"
-# aws_access_key    = "AKIA4RCMYZDL4IBMYJPU"
-# aws_secret_key    = "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"
 environment = "prod"
 vpc_tag_name = "ecs-cluster"
 number_of_private_subnets = 2
@@ -13,7 +11,6 @@ security_group_lb_description = "allow inbound access from vpc only"
 security_group_ecs_tasks_description = "allow inbound access from alb security group only"
 app_port = 5000
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
-
 
 namespace = "devCluster"
 cluster_tag_name = "ecs-DevCluster"
