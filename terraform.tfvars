@@ -13,11 +13,11 @@ app_port = 5000
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
 namespace = "devCluster"
-cluster_tag_name = "ecs-DevCluster"
+cluster_tag_name = "ecs-dev-cluster"
 
-app_image_movie = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:movie1"
-app_image_home = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:home1"
-app_count = "2"
+app_image_movie = "205644017509.dkr.ecr.us-east-1.amazonaws.com/my-repo:movie1"
+app_image_home = "205644017509.dkr.ecr.us-east-1.amazonaws.com/my-repo:home1"
+app_count = "1"
 movie_dns_name= "movie"
 home_dns_name = "home"
 home_family_name = "home"
@@ -32,8 +32,8 @@ health_check_path_home = "/home"
 tg_name_home = "home-tg"
 tg_name_movie = "movie-tg"
 
-path_pattern_home = "home/*"
-path_pattern_movie = "movie/*"
+path_pattern_home = "/home/*"
+path_pattern_movie = "/movie/*"
 
 security_group_ecs_tasks_name_movie = "movie-ecs-task-sg"
 security_group_ecs_tasks_name_home = "home-ecs-task-sg"
