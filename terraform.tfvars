@@ -9,7 +9,9 @@ security_group_lb_name= "alb-sg"
 security_group_ecs_tasks_name = "ecs-tasks-sg"
 security_group_lb_description = "allow inbound access from vpc only"
 security_group_ecs_tasks_description = "allow inbound access from alb security group only"
-app_port = 5000
+# app_port = 5000
+app_port_movie = 5001
+app_port_home = 5001
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
 namespace = "devCluster"
