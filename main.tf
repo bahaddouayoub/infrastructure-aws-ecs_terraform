@@ -11,21 +11,21 @@ provider "aws" {
 }
 
 
-# network
-module vpc_for_ecs_fargate {
-  source = "./modules/vpc-cluster"
-  environment = var.environment
-  vpc_tag_name = var.vpc_tag_name
-  vpc_cidr_block = var.vpc_cidr_block
-  number_of_private_subnets = 3
-  private_subnet_tag_name = var.private_subnet_tag_name 
-  security_group_lb_name = var.security_group_lb_name
-  private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
-  security_group_lb_description = var.security_group_lb_description
-  # app_port = var.app_port
-  availability_zones = var.availability_zones
-  region = var.region
-}
+# # network
+# module vpc_for_ecs_fargate {
+#   source = "./modules/vpc-cluster"
+#   environment = var.environment
+#   vpc_tag_name = var.vpc_tag_name
+#   vpc_cidr_block = var.vpc_cidr_block
+#   number_of_private_subnets = 3
+#   private_subnet_tag_name = var.private_subnet_tag_name 
+#   security_group_lb_name = var.security_group_lb_name
+#   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
+#   security_group_lb_description = var.security_group_lb_description
+#   # app_port = var.app_port
+#   availability_zones = var.availability_zones
+#   region = var.region
+# }
 
 
 # #ECS cluster
@@ -142,23 +142,30 @@ module vpc_for_ecs_fargate {
 # }
 
 
-# RDS postgresql
-module rds_postgresql {
-  source = "./modules/rds-postgres"
-  subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-  vpc_id = module.vpc_for_ecs_fargate.vpc_id
-  parameter_group_name = var.parameter_group_name
-  parameter_group_family = var.parameter_group_family
-  param_log_statement = var.param_log_statement
-  allocated_storage     = var.allocated_storage
-  max_allocated_storage = var.max_allocated_storage
-  storage_type          = var.storage_type
-  instance_class         = var.instance_class
-  db_username               = var.db_username
-  db_password               = var.db_password
-  db_port                  = var.db_port
-  multi_az               = var.multi_az
-  skip_final_snapshot    = var.skip_final_snapshot
-  backup_retention_period= var.backup_retention_period 
-  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
+# # RDS postgresql
+# module rds_postgresql {
+#   source = "./modules/rds-postgres"
+#   subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
+#   vpc_id = module.vpc_for_ecs_fargate.vpc_id
+#   parameter_group_name = var.parameter_group_name
+#   parameter_group_family = var.parameter_group_family
+#   param_log_statement = var.param_log_statement
+#   allocated_storage     = var.allocated_storage
+#   max_allocated_storage = var.max_allocated_storage
+#   storage_type          = var.storage_type
+#   instance_class         = var.instance_class
+#   db_username               = var.db_username
+#   db_password               = var.db_password
+#   db_port                  = var.db_port
+#   multi_az               = var.multi_az
+#   skip_final_snapshot    = var.skip_final_snapshot
+#   backup_retention_period= var.backup_retention_period 
+#   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
+# }
+
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/16" # Replace with your desired CIDR block
+  tags = {
+    Name = "my-vpc" # Replace with your desired VPC name
+  }
 }
