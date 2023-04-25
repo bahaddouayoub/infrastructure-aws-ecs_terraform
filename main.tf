@@ -36,13 +36,13 @@ module ecs_cluster {
   namespace = var.namespace
 }
 
-# #MSKcluster
-# module msk_cluster {
-#   source = "./modules/msk-cluster"
-#   cluster_name =  "msk-cluster-${var.environment}" 
-#   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-#   vpc_id = module.vpc_for_ecs_fargate.vpc_id
-# }
+#MSKcluster
+module msk_cluster {
+  source = "./modules/msk-cluster"
+  cluster_name =  "msk-cluster-${var.environment}" 
+  private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
+  vpc_id = module.vpc_for_ecs_fargate.vpc_id
+}
 
 
 # #ECS load balancers
