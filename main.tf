@@ -30,7 +30,7 @@ module "vpc_for_ecs_fargate" {
 
 #ECS cluster
 module ecs_cluster {
-  source = "./modules/ecs-cluster"
+  source = "./ecs-cluster"
   name = "ecs-cluster-${var.environment}"
   cluster_tag_name = "cluster-${var.environment}"
   namespace = var.namespace
@@ -38,7 +38,7 @@ module ecs_cluster {
 
 #MSKcluster
 module msk_cluster {
-  source = "./modules/msk-cluster"
+  source = "./msk-cluster"
   cluster_name =  "msk-cluster-${var.environment}" 
   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
@@ -47,7 +47,7 @@ module msk_cluster {
 
 # #ECS load balancers
 # module load_balancers {
-#   source = "./modules/load-balancers"
+#   source = "./load-balancers"
 #   aws_security_group_alb_id = module.vpc_for_ecs_fargate.aws_security_group_alb_id
 #   vpc_id = module.vpc_for_ecs_fargate.vpc_id
 #   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
@@ -59,7 +59,7 @@ module msk_cluster {
 # # ECS task definition and service for movie
 # module fargate_cluster_movie {
 #   # Task definition and NLB
-#   source = "./modules/fargate-cluster"
+#   source = "./fargate-cluster"
 #   family_name = "movie"
 #   dns_name = var.movie_dns_name
 #   container_name = var.movie_container_name
@@ -97,7 +97,7 @@ module msk_cluster {
 # # # # ECS task definition and service for home
 # module fargate_cluster_home {
 #   # Task definition and NLB
-#   source = "./modules/fargate-cluster"
+#   source = "./fargate-cluster"
 #   family_name = "home"
 #   dns_name = var.home_dns_name
 #   container_name = var.home_container_name
@@ -131,7 +131,7 @@ module msk_cluster {
 
 # # API Gateway and VPC link
 # module api_gateway {
-#   source = "./modules/api-gateway"
+#   source = "./api-gateway"
 #   name = "${var.environment}"
 #   integration_input_type = "HTTP_PROXY"
 #   path_part = "{proxy+}"
@@ -144,7 +144,7 @@ module msk_cluster {
 
 # # RDS postgresql
 # module rds_postgresql {
-#   source = "./modules/rds-postgres"
+#   source = "./rds-postgres"
 #   subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
 #   vpc_id = module.vpc_for_ecs_fargate.vpc_id
 #   parameter_group_name = var.parameter_group_name
