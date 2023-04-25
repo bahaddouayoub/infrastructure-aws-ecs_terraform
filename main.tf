@@ -7,34 +7,34 @@
 # }
 
 provider "aws" {
-    region     = var.region
+  region = var.region
 }
 
 
-# # network
-# module vpc_for_ecs_fargate {
-#   source = "./modules/vpc-cluster"
-#   environment = var.environment
-#   vpc_tag_name = var.vpc_tag_name
-#   vpc_cidr_block = var.vpc_cidr_block
-#   number_of_private_subnets = 3
-#   private_subnet_tag_name = var.private_subnet_tag_name 
-#   security_group_lb_name = var.security_group_lb_name
-#   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
-#   security_group_lb_description = var.security_group_lb_description
-#   # app_port = var.app_port
-#   availability_zones = var.availability_zones
-#   region = var.region
-# }
+# network
+module "vpc_for_ecs_fargate" {
+  source                        = "./vpc-cluster"
+  environment                   = var.environment
+  vpc_tag_name                  = var.vpc_tag_name
+  vpc_cidr_block                = var.vpc_cidr_block
+  number_of_private_subnets     = 3
+  private_subnet_tag_name       = var.private_subnet_tag_name
+  security_group_lb_name        = var.security_group_lb_name
+  private_subnet_cidr_blocks    = var.private_subnet_cidr_blocks
+  security_group_lb_description = var.security_group_lb_description
+  # app_port = var.app_port
+  availability_zones = var.availability_zones
+  region             = var.region
+}
 
 
-# #ECS cluster
-# module ecs_cluster {
-#   source = "./modules/ecs-cluster"
-#   name = "ecs-cluster-${var.environment}"
-#   cluster_tag_name = "cluster-${var.environment}"
-#   namespace = var.namespace
-# }
+#ECS cluster
+module ecs_cluster {
+  source = "./modules/ecs-cluster"
+  name = "ecs-cluster-${var.environment}"
+  cluster_tag_name = "cluster-${var.environment}"
+  namespace = var.namespace
+}
 
 # #MSKcluster
 # module msk_cluster {
@@ -71,7 +71,7 @@ provider "aws" {
 #   app_port = var.app_port_movie
 #   vpc_id = module.vpc_for_ecs_fargate.vpc_id
 #   environment = var.environment
-  
+
 #   # load balancers
 #   health_check_path = var.health_check_path_movie
 #   tg_name = var.tg_name_movie
@@ -88,7 +88,7 @@ provider "aws" {
 #   alb_sg = module.vpc_for_ecs_fargate.aws_security_group_alb_id
 #   security_group_ecs_tasks_name = var.security_group_ecs_tasks_name_movie
 #   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-  
+
 # }
 
 
@@ -109,7 +109,7 @@ provider "aws" {
 #   app_port = var.app_port_home
 #   vpc_id = module.vpc_for_ecs_fargate.vpc_id
 #   environment = var.environment
-  
+
 #   # load balancers
 #   health_check_path = var.health_check_path_home
 #   tg_name = var.tg_name_home
@@ -163,9 +163,3 @@ provider "aws" {
 #   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 # }
 
-resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16" # Replace with your desired CIDR block
-  tags = {
-    Name = "my-vpc" # Replace with your desired VPC name
-  }
-}
