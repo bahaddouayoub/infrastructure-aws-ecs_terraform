@@ -17,15 +17,15 @@ pipeline {
                     }
                 }
             }
-    stage('Terraform Formate') {
-      steps {
-        sh 'terraform fmt'
-      }
+  stage('Terraform Init') {
+    steps {
+      sh 'terraform init'
     }
-    stage('Terraform Init') {
-      steps {
-        sh 'terraform init'
-      }
+  }
+  stage('Terraform Formate') {
+    steps {
+      sh 'terraform fmt'
+    }
     }
    stage('Terraform Validate'){
     steps{

@@ -1,16 +1,3 @@
-# terraform {
-#     backend "s3" {
-#         bucket = "state-bucket"
-#         key = "state.tfstate"
-#         region = var.region
-#     }
-# }
-
-provider "aws" {
-  region = var.region
-}
-
-
 # network
 module "vpc_for_ecs_fargate" {
   source                        = "./vpc-cluster"
@@ -22,27 +9,26 @@ module "vpc_for_ecs_fargate" {
   security_group_lb_name        = var.security_group_lb_name
   private_subnet_cidr_blocks    = var.private_subnet_cidr_blocks
   security_group_lb_description = var.security_group_lb_description
-  # app_port = var.app_port
   availability_zones = var.availability_zones
   region             = var.region
 }
 
 
-#ECS cluster
-module ecs_cluster {
-  source = "./ecs-cluster"
-  name = "ecs-cluster-${var.environment}"
-  cluster_tag_name = "cluster-${var.environment}"
-  namespace = var.namespace
-}
+# #ECS cluster
+# module ecs_cluster {
+#   source = "./ecs-cluster"
+#   name = "ecs-cluster-${var.environment}"
+#   cluster_tag_name = "cluster-${var.environment}"
+#   namespace = var.namespace
+# }
 
-#MSKcluster
-module msk_cluster {
-  source = "./msk-cluster"
-  cluster_name =  "msk-cluster-${var.environment}" 
-  private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-  vpc_id = module.vpc_for_ecs_fargate.vpc_id
-}
+# #MSKcluster
+# module msk_cluster {
+#   source = "./msk-cluster"
+#   cluster_name =  "msk-cluster-${var.environment}" 
+#   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
+#   vpc_id = module.vpc_for_ecs_fargate.vpc_id
+# }
 
 
 # #ECS load balancers

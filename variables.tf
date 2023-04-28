@@ -5,21 +5,21 @@ variable "region" {
 
 variable "environment" {
   description = "Applicaiton environment"
-  type = string
+  type        = string
 }
 
 variable "app_port_home" {
   description = "Application port"
-  type = number
+  type        = number
 }
 
 variable "app_port_movie" {
   description = "Application port"
-  type = number
+  type        = number
 }
 
 variable "availability_zones" {
-  type  = list(string)
+  type        = list(string)
   description = "List of availability zones for the selected region"
 }
 
@@ -29,8 +29,8 @@ variable "vpc_tag_name" {
 }
 
 variable "number_of_private_subnets" {
-  type = number 
-  default = 1
+  type        = number
+  default     = 1
   description = "The number of private subnets in a VPC."
 }
 
@@ -117,66 +117,66 @@ variable "movie_family_name" {
 
 
 variable "movie_dns_name" {
-  type = string 
+  type        = string
   description = "domain name that will for service to service communication"
 }
 
 variable "home_dns_name" {
-  type = string 
+  type        = string
   description = "domain name that will for service to service communication"
 }
 
 variable "health_check_path_home" {
-  type = string 
-  description = "health_check_path_home"  
+  type        = string
+  description = "health_check_path_home"
 }
 
 variable "tg_name_home" {
-  type = string 
+  type        = string
   description = "tg_name_home"
 }
 
 variable "path_pattern_home" {
-  type = string 
+  type        = string
   description = "the path_pattern home"
 }
 
 variable "app_image_home" {
-  type = string 
+  type        = string
   description = "Container image to be used for application in task definition file"
 }
 
 
 variable "app_image_movie" {
-  type = string 
+  type        = string
   description = "Container image to be used for application in task definition file"
 }
 
 
 variable "health_check_path_movie" {
-  type = string 
+  type        = string
   description = "health_check_path_movie"
 }
 
 
 variable "tg_name_movie" {
-  type = string 
-  description = "tg_name_movie"  
+  type        = string
+  description = "tg_name_movie"
 }
 
 
 variable "path_pattern_movie" {
-  type = string 
+  type        = string
   description = "the path_pattern movie"
 }
 
 variable "security_group_ecs_tasks_name_movie" {
-  type = string 
+  type        = string
   description = "the security group ecs_tasks_name_movie"
 }
 
 variable "security_group_ecs_tasks_name_home" {
-  type = string 
+  type        = string
   description = "the security group ecs_tasks_name_home"
 }
 
@@ -191,11 +191,11 @@ variable "security_group_ecs_tasks_name_home" {
 # }
 
 variable "app_count" {
-  type = string 
+  type        = string
   description = "The number of instances of the task definition to place and keep running."
 }
 variable "namespace" {
-  type = string
+  type        = string
   description = "default namespace"
 }
 
