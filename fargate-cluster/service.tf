@@ -26,9 +26,6 @@ resource "aws_ecs_service" "main" {
         dns_name = var.dns_name
       }
     }
-    # log_configuration{
-
-    # }
   }
 
   depends_on = [
@@ -36,8 +33,7 @@ resource "aws_ecs_service" "main" {
   ]
 }
 
-# Traffic to the ECS Cluster should only come from the ALB
-# or AWS services through an AWS PrivateLink
+# Traffic to the ECS Cluster should only come from the VPC
 resource "aws_security_group" "ecs_tasks" {
   name        = "${var.security_group_ecs_tasks_name}-${var.environment}"
   description = var.security_group_ecs_tasks_description
@@ -47,7 +43,7 @@ resource "aws_security_group" "ecs_tasks" {
     protocol    = "tcp"
     from_port   = var.app_port
     to_port     = var.app_port
-    security_groups = ["${var.alb_sg}"]
+    cidr_blocks = ["11.0.0.0/16"]
   }
 
   ingress {
@@ -65,45 +61,54 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+# networ load balancer
+resource "aws_lb" "nlb" {
+  name               = "nlb"
+  internal           = true
+  load_balancer_type = "network"
+  subnets            = var.private_subnet_ids
 
+  enable_deletion_protection = false
+
+  tags = {
+    Environment = var.environment
+  }
+}
 
 # Target group for alb
 resource "aws_lb_target_group" "tg" {
   depends_on  = [
-    var.aws_lb
+    aws_lb.nlb
   ]
   name        = var.tg_name
   port        = var.app_port
-  protocol    = "HTTP"
+  protocol    = "TCP"
   target_type = "ip"
   vpc_id      = var.vpc_id
 
-  health_check {
-    path = var.health_check_path
-    healthy_threshold = 6
-    unhealthy_threshold = 2
-    timeout = 2
-    interval = 5
-    matcher = "200"  # has to be HTTP 200 or fails
-  }
+  # health_check {
+  #   port     = var.app_port
+  #   protocol = "TCP"
+  #   # path = var.health_check_path
+  #   # healthy_threshold = 6
+  #   # unhealthy_threshold = 2
+  #   # timeout = 2
+  #   # interval = 5
+  #   # matcher = "200"  # has to be HTTP 200 or fails
+  # }
 }
 
-#listners
-resource "aws_lb_listener_rule" "rule" {
-  listener_arn = var.aws_lb_listener_arn
-  priority     = var.priority
 
-  action {
-    type             = "forward"
+# Redirect all traffic from the NLB to the application load balancer as a target group
+resource "aws_lb_listener" "nlb_listener" {
+  load_balancer_arn = aws_lb.nlb.arn
+  port              = var.app_port
+  protocol    = "TCP"
+
+  default_action {
     target_group_arn = aws_lb_target_group.tg.arn
+    type             = "forward"
   }
-
-  condition {
-    path_pattern {
-      values = ["${var.path_pattern}"]
-    }
-  }
-
 }
 
 

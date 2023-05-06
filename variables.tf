@@ -8,6 +8,15 @@ variable "environment" {
   type        = string
 }
 
+variable "skipper_env_file" {
+  description = "skipper env_file"
+  type        = string
+}
+variable "kafka_env_file" {
+  description = "kafka env_file"
+  type        = string
+}
+
 variable "app_port_home" {
   description = "Application port"
   type        = number
@@ -136,10 +145,10 @@ variable "tg_name_home" {
   description = "tg_name_home"
 }
 
-variable "path_pattern_home" {
-  type        = string
-  description = "the path_pattern home"
-}
+# variable "path_pattern_home" {
+#   type        = string
+#   description = "the path_pattern home"
+# }
 
 variable "app_image_home" {
   type        = string
@@ -165,10 +174,10 @@ variable "tg_name_movie" {
 }
 
 
-variable "path_pattern_movie" {
-  type        = string
-  description = "the path_pattern movie"
-}
+# variable "path_pattern_movie" {
+#   type        = string
+#   description = "the path_pattern movie"
+# }
 
 variable "security_group_ecs_tasks_name_movie" {
   type        = string
