@@ -25,6 +25,24 @@ resource "aws_iam_role_policy" "task_role_policy" {
 {
     "Version": "2012-10-17",
     "Statement": [
+          {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::env-bucket.terraforma/*"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetBucketLocation"
+          ],
+          "Resource": [
+            "arn:aws:s3:::env-bucket.terraforma/*"
+          ]
+        },
         {
             "Effect": "Allow",
             "Action": [

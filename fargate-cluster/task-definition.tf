@@ -22,11 +22,13 @@ resource "aws_ecs_task_definition" "main" {
           appProtocol: "http"
         }
       ],
+            "essential": true,
+            "environment": jsondecode(file("${var.env_file}")),
       "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
                     "awslogs-create-group": "true",
-                    "awslogs-group": "/ecs/logs",
+                    "awslogs-group": var.logs,
                     "awslogs-region": "us-east-1",
                     "awslogs-stream-prefix": "ecs"
                 }

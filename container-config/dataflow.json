@@ -1,0 +1,56 @@
+[{
+    "name": "LANG",
+    "value": "en_US.utf8"
+  },
+  {
+    "name": "LC_ALL",
+    "value": "en_US.utf8"
+  },
+  {
+    "name": "JDK_JAVA_OPTIONS",
+    "value": "-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"
+  },
+  {
+    "name": "SPRINGDOC_APIDOCS_ENABLED",
+    "value": "true"
+  },
+  {
+    "name": "SPRINGDOC_SWAGGERUI_ENABLED",
+    "value": "true"
+  },
+  {
+    "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS",
+    "value": "PLAINTEXT://b-2.mskclusterprod.5frg2p.c4.kafka.us-east-1.amazonaws.com:9092"
+  },
+  {
+    "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS",
+    "value": "PLAINTEXT://b-2.mskclusterprod.5frg2p.c4.kafka.us-east-1.amazonaws.com:9092"
+  },
+  {
+    "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL",
+    "value": "DEBUG"
+  },
+  {
+    "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED",
+    "value": "true"
+  },
+  {
+    "name": "SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",
+    "value": "http://skipper-server:7578/api"
+  },
+  {
+    "name": "SPRING_DATASOURCE_URL",
+    "value": "jdbc:postgresql://database-2.cr7njsrnvjdg.us-east-1.rds.amazonaws.com:5432/dataflow"
+  },
+  {
+    "name": "SPRING_DATASOURCE_USERNAME",
+    "value": "postgres"
+  },
+  {
+    "name": "SPRING_DATASOURCE_PASSWORD",
+    "value": "postgres123"
+  },
+  {
+    "name": "SPRING_DATASOURCE_DRIVER_CLASS_NAME",
+    "value": "org.postgresql.Driver"
+  }]
