@@ -27,19 +27,7 @@ module msk_cluster {
   cluster_name =  "msk-cluster-${var.environment}" 
   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
   vpc_id = module.vpc_for_ecs_fargate.vpc_id
-  # task_sg = module.fargate_cluster.aws_security_group_alb_id 
 }
-
-
-#ECS load balancers
-# module load_balancers {
-#   source = "./load-balancers"
-#   aws_security_group_alb_id = module.vpc_for_ecs_fargate.aws_security_group_alb_id
-#   vpc_id = module.vpc_for_ecs_fargate.vpc_id
-#   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-#   target_group = module.fa
-#   environment = var.environment
-# }
 
 
 # ECS task definition and service for movie
@@ -118,24 +106,24 @@ module api_gateway {
 }
 
 
-# # RDS postgresql
-# # module rds_postgresql {
-# #   source = "./rds-postgres"
-# #   subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
-# #   vpc_id = module.vpc_for_ecs_fargate.vpc_id
-# #   parameter_group_name = var.parameter_group_name
-# #   parameter_group_family = var.parameter_group_family
-# #   param_log_statement = var.param_log_statement
-# #   allocated_storage     = var.allocated_storage
-# #   max_allocated_storage = var.max_allocated_storage
-# #   storage_type          = var.storage_type
-# #   instance_class         = var.instance_class
-# #   db_username               = var.db_username
-# #   db_password               = var.db_password
-# #   db_port                  = var.db_port
-# #   multi_az               = var.multi_az
-# #   skip_final_snapshot    = var.skip_final_snapshot
-# #   backup_retention_period= var.backup_retention_period 
-# #   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
-# # }
+# RDS postgresql
+module rds_postgresql {
+  source = "./rds-postgres"
+  subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
+  vpc_id = module.vpc_for_ecs_fargate.vpc_id
+  parameter_group_name = var.parameter_group_name
+  parameter_group_family = var.parameter_group_family
+  param_log_statement = var.param_log_statement
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
+  storage_type          = var.storage_type
+  instance_class         = var.instance_class
+  db_username               = var.db_username
+  db_password               = var.db_password
+  db_port                  = var.db_port
+  multi_az               = var.multi_az
+  skip_final_snapshot    = var.skip_final_snapshot
+  backup_retention_period= var.backup_retention_period 
+  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
+}
 
