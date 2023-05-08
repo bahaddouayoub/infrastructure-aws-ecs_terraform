@@ -180,6 +180,17 @@ This repository contains the source code for a containerised application in AWS 
 
 
 # steps to deploy dataflow infrastructure
+## create s3 bucket as a backend for our terraform state
+  ```
+terraform {
+  required_version = ">=0.12"
+  backend "s3" {
+    bucket = "your-backet-name"
+    key    = "your key name in the backet level"
+    region = "your-region"
+  }
+}
+  ```
 ## Push Container Image to ECR
 The main thing we want to achieve on this part is to push a dataflow, skipper, app stream... docker images to an AWS ECR repository
   1. Authenticate to AWS ECR,
