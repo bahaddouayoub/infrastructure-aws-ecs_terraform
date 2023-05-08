@@ -8,10 +8,10 @@ variable "nlb_arn" {
   description = "The ARN of the internal NLB"
 }
 
-variable "app_port" {
-  type = number 
-  description = "The Application port"
-}
+# variable "app_port" {
+#   type = number 
+#   description = "The Application port"
+# }
 
 variable "nlb_dns_name" {
   type = string

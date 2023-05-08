@@ -6,9 +6,9 @@ module "vpc_for_ecs_fargate" {
   vpc_cidr_block                = var.vpc_cidr_block
   number_of_private_subnets     = 3
   private_subnet_tag_name       = var.private_subnet_tag_name
-  security_group_lb_name        = var.security_group_lb_name
+  # security_group_lb_name        = var.security_group_lb_name
   private_subnet_cidr_blocks    = var.private_subnet_cidr_blocks
-  security_group_lb_description = var.security_group_lb_description
+  # security_group_lb_description = var.security_group_lb_description
   availability_zones = var.availability_zones
   region             = var.region
 }
@@ -49,7 +49,7 @@ module fargate_cluster_movie {
   environment = var.environment
 
   # load balancers
-  health_check_path = var.health_check_path_movie
+  # health_check_path = var.health_check_path_movie
   tg_name = var.tg_name_movie
 
   # Service
@@ -99,7 +99,7 @@ module api_gateway {
   name = "${var.environment}"
   integration_input_type = "HTTP_PROXY"
   path_part = "{proxy+}"
-  app_port = 80
+  # app_port = 80
   nlb_dns_name = module.fargate_cluster_movie.nlb_dns_name
   nlb_arn = module.fargate_cluster_movie.nlb_arn
   environment = var.environment

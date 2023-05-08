@@ -32,17 +32,17 @@ variable "environment" {
   description = "Application enviroment"
 }
 
-variable "security_group_lb_name" {
-  type        = string
-  default     = "alb-sg"
-  description = "alb security group name"
-}
+# variable "security_group_lb_name" {
+#   type        = string
+#   default     = "alb-sg"
+#   description = "alb security group name"
+# }
 
-variable "security_group_lb_description" {
-  type        = string
-  default     = "allow inbound access from the ECS ALB only"
-  description = "ECS tasks security group description"
-}
+# variable "security_group_lb_description" {
+#   type        = string
+#   default     = "allow inbound access from the ECS ALB only"
+#   description = "ECS tasks security group description"
+# }
 
 # variable "app_port" {
 #   type        = string

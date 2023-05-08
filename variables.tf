@@ -135,10 +135,10 @@ variable "home_dns_name" {
   description = "domain name that will for service to service communication"
 }
 
-variable "health_check_path_home" {
-  type        = string
-  description = "health_check_path_home"
-}
+# variable "health_check_path_home" {
+#   type        = string
+#   description = "health_check_path_home"
+# }
 
 variable "tg_name_home" {
   type        = string
@@ -162,10 +162,10 @@ variable "app_image_movie" {
 }
 
 
-variable "health_check_path_movie" {
-  type        = string
-  description = "health_check_path_movie"
-}
+# variable "health_check_path_movie" {
+#   type        = string
+#   description = "health_check_path_movie"
+# }
 
 
 variable "tg_name_movie" {

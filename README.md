@@ -40,32 +40,135 @@ This repository contains the source code for a containerised application in AWS 
 | [aws_instance.instance_1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_instance.instance_2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 
-## Inputs
+## vpc_for_ecs_fargate module Inputs 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_environment"></a> [environment](#input\_environment) | Value of the Environment Tag for the S3 bucket | `string` | n/a | yes |
-| <a name="input_instance_1_ami"></a> [instance\_1\_ami](#input\_instance\_1\_ami) | Value of the AMI ID for the EC2 instance | `string` | n/a | yes |
-| <a name="input_instance_1_name"></a> [instance\_1\_name](#input\_instance\_1\_name) | Value of the Name Tag for the EC2 instance | `string` | n/a | yes |
-| <a name="input_instance_1_type"></a> [instance\_1\_type](#input\_instance\_1\_type) | Value of the Instance Type for the EC2 instance | `string` | n/a | yes |
-| <a name="input_instance_2_ami"></a> [instance\_2\_ami](#input\_instance\_2\_ami) | Value of the AMI ID for the EC2 instance | `string` | n/a | yes |
-| <a name="input_instance_2_name"></a> [instance\_2\_name](#input\_instance\_2\_name) | Value of the Name Tag for the EC2 instance | `string` | n/a | yes |
-| <a name="input_instance_2_type"></a> [instance\_2\_type](#input\_instance\_2\_type) | Value of the Instance Type for the EC2 instance | `string` | n/a | yes |
-| <a name="input_terraform"></a> [terraform](#input\_terraform) | Value of the Terraform Tag for the S3 bucket | `string` | n/a | yes |
-| <a name="input_website_s3_bucket_1_name"></a> [website\_s3\_bucket\_1\_name](#input\_website\_s3\_bucket\_1\_name) | Value of the Name Tag for the S3 bucket | `string` | n/a | yes |
-| <a name="input_website_s3_bucket_2_name"></a> [website\_s3\_bucket\_2\_name](#input\_website\_s3\_bucket\_2\_name) | Value of the Name Tag for the S3 bucket | `string` | n/a | yes |
+| <a href="environment">environment</a>| Value of the Environment (dev, uat, prod, ...) | `string` | n/a | yes |
+| <a href="vpc_cidr_block">vpc_cidr_block</a> | Vpc cidr block | `string` | n/a | yes |
+| <a href="number_of_private_subnets">number_of_private_subnets</a>| Number of private subnets | `number` | n/a | yes |
+| <a href="private_subnet_tag_name">private_subnet_tag_name</a> | Private subnet tag name | `string` | n/a | yes |
+| <a href="private_subnet_cidr_blocks">private_subnet_cidr_blocks</a>| Private subnet cidr blocks | `string` | n/a | yes |
+| <a href="availability_zones">availability_zones</a> | Availability zones | `string` | n/a | yes |   
+| <a href="region">region</a> | AWS region | `string` | n/a | yes |  
+| <a href="vpc_tag_name">vpc_tag_name</a> | Vpc tag name  | `string` | n/a | yes |
 
-## Outputs
+
+## vpc_for_ecs_fargate module Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_instance_1_id"></a> [instance\_1\_id](#output\_instance\_1\_id) | The ID of the instance-1 |
-| <a name="output_instance_2_id"></a> [instance\_2\_id](#output\_instance\_2\_id) | The ID of the instance-2 |
-| <a name="output_website_bucket_1_arn"></a> [website\_bucket\_1\_arn](#output\_website\_bucket\_1\_arn) | ARN of the bucket |
-| <a name="output_website_bucket_1_domain"></a> [website\_bucket\_1\_domain](#output\_website\_bucket\_1\_domain) | Domain name of the bucket |
-| <a name="output_website_bucket_1_name"></a> [website\_bucket\_1\_name](#output\_website\_bucket\_1\_name) | Name (id) of the bucket |
-| <a name="output_website_bucket_2_arn"></a> [website\_bucket\_2\_arn](#output\_website\_bucket\_2\_arn) | ARN of the bucket |
-| <a name="output_website_bucket_2_domain"></a> [website\_bucket\_2\_domain](#output\_website\_bucket\_2\_domain) | Domain name of the bucket |
-| <a name="output_website_bucket_2_name"></a> [website\_bucket\_2\_name](#output\_website\_bucket\_2\_name) | Name (id) of the bucket |
+| <a href="output vpc_id">output vpc_id</a> | The ID of vpc |
+| <a href="output vpc_arn">output vpc_arn</a> | The  vpc arn |
+| <a href="output private_subnet_ids">output private_subnet_ids</a> | The private subnet idsc |
+
+
+## ecs_cluster module Inputs 
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a href="name">name</a>| The name of the cluster | `string` | n/a | yes |
+| <a href="cluster_tag_name">cluster_tag_name</a> |Cluster tag name | `string` | n/a | yes |
+| <a href="namespace">number_of_private_subnets</a>|The namespace related with ecs cluster | `string` | n/a | yes |
+
+## ecs_cluster module Outputs
+
+| Name | Description |
+|------|-------------|
+| <a href="output id">output id</a> | The ID of ecs cluster |
+| <a href="output arn">output arn</a> | The  ecs cluster arn |
+| <a href="output namespace">output namespace</a> | cloudMmap namespace used in ecs service connect |
+
+
+## msk_cluster module Inputs 
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a href="cluster_name">cluster_name</a>| The name of the msk cluster | `string` | n/a | yes |
+| <a href="private_subnet_ids">private_subnet_ids</a> | Private subnet ids when the MSK cluster provisioned | `string` | n/a | yes |
+| <a href="vpc_id">vpc_id</a>|The network when the MSK cluster provisioned | `string` | n/a | yes |
+
+
+## msk_cluster module Outputs
+
+| Name | Description |
+|------|-------------|
+| <a href="output bootstrap_brokers">output bootstrap_brokers</a> | PLAINTEXT connection host:port pairs |
+
+
+
+## fargate_cluster module Inputs 
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a href="environment">environment</a>|Value of the Environment (dev, uat, prod, ...)| `string` | n/a | yes |
+| <a href="family_name">family_name</a>| The name of the task definition family | `string` | n/a | yes |
+| <a href="env_file">env_file</a> | The location of the container environment variables file | `string` | n/a | yes |
+| <a href="dns_name">dns_name</a>|Service connect dns name | `string` | n/a | yes |
+| <a href="container_name">container_name</a>|The name of the container | `string` | n/a | yes |
+| <a href="app_image">app_image</a>| The name of docker image used that we store on ECR | `string` | n/a | yes |
+| <a href="namespace">namespace</a>|Service connect namespace in cloudMap | `string` | n/a | yes |
+| <a href="port_mapping">port_mapping</a>| The name of port mapping created in task def before | `string` | n/a | yes |
+| <a href="fargate_cpu">fargate_cpu</a>|the number of vcpu will use by the task | `number` | n/a | yes |
+| <a href="fargate_memory">fargate_memory</a>| The amount of memory  will use by the task  | `number` | n/a | yes |
+| <a href="app_port">app_port</a>|The container port  | `number` | n/a | yes |
+| <a href="vpc_id">vpc_id</a>|The vpc id  | `string` | n/a | yes |
+| <a href="logs">logs</a>|The cloudwatch log group  | `string` | n/a | yes |
+| <a href="tg_name">tg_name</a>|The target group name  | `string` | n/a | yes |
+| <a href="service_connect_port">service_connect_port</a>|Service connect port that will use to inter-connect micro-services  | `number` | n/a | yes |
+| <a href="cluster_id">cluster_id</a>|Ecs cluster id  | `string` | n/a | yes |
+| <a href="app_count">app_count</a>|The number of desired tasks   | `number` | n/a | yes |
+| <a href="security_group_ecs_tasks_name">security_group_ecs_tasks_name</a>| Task security group  | `string` | n/a | yes |
+| <a href="private_subnet_ids">private_subnet_ids</a>|Private subnet ids when tasks deployed  | `string` | n/a | yes |
+
+
+## fargate_cluster module Outputs
+
+| Name | Description |
+|------|-------------|
+| <a href="output nlb_dns_name">output nlb_dns_name</a> | DNS name for the internal NLB |
+| <a href="output nlb_arn">output nlb_arn</a> | ARN for the internal NLB |
+
+
+
+## api_gateway module Inputs 
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a href="environment">environment</a>|Value of the Environment (dev, uat, prod, ...)| `string` | n/a | yes |
+| <a href="name">name</a>| The name of the api gateway | `string` | n/a | yes |
+| <a href="integration_input_type">integration_input_type</a> | The integration type(HTTP_PROXY)  | `string` | n/a | yes |
+| <a href="path_part">path_part</a>|The path part({proxy+}) | `string` | n/a | yes |
+| <a href="nlb_dns_name">nlb_dns_name</a>| The network load balancer dns  | `string` | n/a | yes |
+| <a href="nlb_arn">nlb_arn</a> | The network load balancer arn  | `string` | n/a | yes |
+
+
+
+
+## rds_postgresql module Inputs 
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a href="vpc_id">vpc_id</a>|The vpc id  | `string` | n/a | yes |
+| <a href="subnet_ids">subnet_ids</a>| subnet ids when RDS postgres database deployed  | `string` | n/a | yes |
+| <a href="parameter_group_name">parameter_group_name</a>| The name of the parametre group | `string` | n/a | yes |
+| <a href="parameter_group_family">parameter_group_family</a> | The parametre group family  | `string` | n/a | yes |
+| <a href="param_log_statement">param_log_statement</a>| The parametre log statement | `string` | n/a | yes |
+| <a href="max_allocated_storage">max_allocated_storage</a> | The max allocated storage for database serve  | `number` | n/a | yes |
+| <a href="allocated_storage">allocated_storage</a>|The allocated storage for database server | `number` | n/a | yes |
+| <a href="storage_type">storage_type</a>| The storage type | `string` | n/a | yes |
+| <a href="instance_class">instance_class</a> | The instance class | `string` | n/a | yes |
+| <a href="db_username">db_username</a>| The db username | `string` | n/a | yes |
+| <a href="db_password">db_password</a> | The db password | `string` | n/a | yes |
+| <a href="db_port">db_port</a>| The db port | `number` | n/a | yes |
+| <a href="instance_class">instance_class</a> | The instance class(db.t3.medium) | `string` | n/a | yes |
+| <a href="multi_az">multi_az</a> | multi_az or not | `bool` | n/a | yes |
+| <a href="skip_final_snapshot">skip_final_snapshot</a>| skip final snapshot or not | `bool` | n/a | yes |
+| <a href="backup_retention_period">backup_retention_period</a> | The backup retention period | `number` | n/a | yes |
+| <a href="enabled_cloudwatch_logs_exports">enabled_cloudwatch_logs_exports</a>| enabled cloudwatch logs exports or not | `bool` | n/a | yes 
+
+
+
+
 <!-- END_TF_DOCS -->
 

@@ -24,33 +24,33 @@ resource "aws_subnet" "private_subnet" {
 
 ### Security Group Setup
 
-# ALB Security group (If you want to use ALB instead of NLB. NLB doesn't use Security Groups)
-resource "aws_security_group" "lb" {
-  name        = "${var.security_group_lb_name}-${var.environment}"
-  description = var.security_group_lb_description
-  vpc_id      = "${aws_vpc.custom_vpc.id}"
+# # ALB Security group (If you want to use ALB instead of NLB. NLB doesn't use Security Groups)
+# resource "aws_security_group" "lb" {
+#   name        = "${var.security_group_lb_name}-${var.environment}"
+#   description = var.security_group_lb_description
+#   vpc_id      = "${aws_vpc.custom_vpc.id}"
 
-  ingress {
-    protocol    = "tcp"
-    from_port   = 80
-    to_port     = 80
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     protocol    = "tcp"
+#     from_port   = 80
+#     to_port     = 80
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     protocol    = "-1"
+#     from_port   = 0
+#     to_port     = 0
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
- }
+#   egress {
+#     protocol    = "-1"
+#     from_port   = 0
+#     to_port     = 0
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#  }
 
 
 # AWS services through an AWS PrivateLink
