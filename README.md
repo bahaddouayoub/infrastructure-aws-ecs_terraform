@@ -1,4 +1,4 @@
-# Deploy Dataflow in ECS Fargate behind API Gateway & NLB for Secure Optimal Accessibility (with Terraform)
+# Deploy Dataflow in ECS Fargate behind API Gateway & NLB for Secure Optimal Accessibility
 ## Overview
 This repository contains the source code for a containerised application in AWS ECS Fargate inside a VPC's private subnets. An API Gateway is used as the doorway to the private network using a VPC link to access the VPC. An NLB is for optimal performance of accessing the application running in the private subnets.
 
@@ -175,6 +175,400 @@ This repository contains the source code for a containerised application in AWS 
 | <a href="skip_final_snapshot">skip_final_snapshot</a>| skip final snapshot or not | `bool` | n/a | yes |
 | <a href="backup_retention_period">backup_retention_period</a> | The backup retention period | `number` | n/a | yes |
 | <a href="enabled_cloudwatch_logs_exports">enabled_cloudwatch_logs_exports</a>| enabled cloudwatch logs exports or not | `bool` | n/a | yes 
+
+
+
+
+# steps to deploy dataflow infrastructure
+## Push Container Image to ECR
+The main thing we want to achieve on this part is to push a dataflow, skipper, app stream... docker images to an AWS ECR repository
+  1. Authenticate to AWS ECR,
+  ```
+  aws ecr get-login --no-include-email
+  ```
+  2. create repository
+  ```
+  aws ecr create-repository --repository-name my-repo
+  ```
+  4. push docker image to ECR
+  ```
+  docker push <your-aws-account-number>.dkr.ecr.<aws-region>.amazonaws.commy-repo:latest
+  ```
+  
+  
+## Setting up our VPC Network Infrastructure
+Amazon VPC lets us provision a logically isolated section of the Amazon Web Services Cloud where we can launch our resources in a virtual network that we define
+### Custom VPC & Private Subnets
+ ```
+  resource "aws_vpc" "custom_vpc" {
+    cidr_block       = var.vpc_cidr_block
+    enable_dns_support = true
+    enable_dns_hostnames = true
+
+    tags = {
+      Name = "${var.vpc_tag_name}-${var.environment}"
+    }
+  }
+
+
+  # Create the private subnets
+  resource "aws_subnet" "private_subnet" {
+    count = var.number_of_private_subnets
+    vpc_id            = "${aws_vpc.custom_vpc.id}"
+    cidr_block = "${element(var.private_subnet_cidr_blocks, count.index)}"
+    availability_zone = "${element(var.availability_zones, count.index)}"
+
+    tags = {
+      Name = "${var.private_subnet_tag_name}-${count.index}-${var.environment}"
+    }
+  }
+   ```
+### Security Groups
+Create a security group that we’ll attach to our instances for our ECS tasks as well as our VPC endpoint interface components. 
+These are the rules we want to apply to our security group:
+  1. Allow inbound traffic on the application port for the VPC CIDR range because our NLB will be forwarding incoming traffic to the instances.
+   ```
+  resource "aws_security_group" "ecs_tasks" {
+    name        = "${var.security_group_ecs_tasks_name}-${var.environment}"
+    description = var.security_group_ecs_tasks_description
+    vpc_id      = "${var.vpc_id}"
+
+    ingress {
+      protocol    = "tcp"
+      from_port   = var.app_port
+      to_port     = var.app_port
+      cidr_blocks = ["11.0.0.0/16"]
+    }
+
+    ingress {
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+
+    egress {
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+   ```
+  2. Allow communication between the VPC endpoint network interfaces and the resources in our VPC that communicate with those services.
+  ```
+    resource "aws_security_group" "privatelink_sg" {
+      lifecycle {
+      ignore_changes = [name]
+    }
+    name        = "privatelinks-sg"
+    description = "allow between subnet and ecr s3 cloudwatch"
+    vpc_id      = "${aws_vpc.custom_vpc.id}"
+
+    ingress {
+      protocol        = "tcp"
+      from_port       = 443
+      to_port         = 443
+      cidr_blocks = [var.vpc_cidr_block]
+    }
+
+    egress {
+      from_port       = 443
+      to_port         = 443
+      protocol        = "tcp"
+      prefix_list_ids = [
+        aws_vpc_endpoint.s3.prefix_list_id
+      ]
+    }
+
+    egress {
+      from_port       = 443
+      to_port         = 443
+      protocol        = "tcp"
+      cidr_blocks = [var.vpc_cidr_block]
+    }
+
+    egress {
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+   ```
+   
+### PrivateLink VPC Endpoints
+Our private subnets have no access to the Internet, but we need our fargate Tasks that will be running our containers to communicate with the ECR repository to pull our Docker image, as well as communicate with the ECS control plane. Before AWS PrivateLink, fargate Tasks had to use an internet gateway to download Docker images stored in ECR or communicate to the ECS control plane. This meant we had to attach an Internet Gateway to our VPC, as well as deploy a NAT Gateway in our public subnet for our private subnets to have access to the Internet.
+
+Instead, we are going to use PrivateLink VPC Endpoints. This enables enhanced security by allowing us to deny our private  fargate Tasks access to anything other than the AWS services we need access to. When you create AWS PrivateLink endpoints for ECR and ECS, these service endpoints appear as Elastic Network Interfaces (ENIs) with a private IP address in your VPC. We’re going to be setting up VPC endpoints for the following services:
+
+1. AWS PrivateLink endpoints for ECR — This allows instances in your VPC to communicate with ECR to download image manifests  
+  ```
+  resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id       = "${aws_vpc.custom_vpc.id}"
+  service_name = "com.amazonaws.${var.region}.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.private_subnet.*.id
+
+  security_group_ids = [
+    aws_security_group.privatelink_sg.id,
+  ]
+
+  tags = {
+    Name = "ECR Docker VPC Endpoint Interface - ${var.environment}"
+    Environment = var.environment
+  }
+  }
+  resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id       = "${aws_vpc.custom_vpc.id}"
+  service_name = "com.amazonaws.${var.region}.ecr.api"
+  vpc_endpoint_type = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.private_subnet.*.id
+
+  security_group_ids = [
+    aws_security_group.privatelink_sg.id,
+  ]
+
+  tags = {
+    Name = "ECR API VPC Endpoint Interface - ${var.environment}"
+    Environment = var.environment
+  }
+}
+  ```
+2. CloudWatch — This will allow our instances to send application logs to CloudWatch.
+
+  ```
+  resource "aws_vpc_endpoint" "cloudwatch" {
+  vpc_id       = "${aws_vpc.custom_vpc.id}"
+  service_name = "com.amazonaws.${var.region}.logs"
+  vpc_endpoint_type = "Interface"
+  subnet_ids          = aws_subnet.private_subnet.*.id
+  private_dns_enabled = true
+
+  security_group_ids = [
+    aws_security_group.privatelink_sg.id,
+  ]
+
+  tags = {
+    Name = "CloudWatch VPC Endpoint Interface - ${var.environment}"
+    Environment = var.environment
+  }
+}
+  ```
+  
+3. Gateway VPC endpoint for Amazon S3 — This allows instances to download the image layers from the underlying private Amazon S3 buckets that host them.
+
+  ```
+  resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = "${aws_vpc.custom_vpc.id}"
+  service_name = "com.amazonaws.${var.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [aws_vpc.custom_vpc.default_route_table_id]
+
+  tags = {
+    Name = "S3 VPC Endpoint Gateway - ${var.environment}"
+    Environment = var.environment
+  }
+}
+  ```
+  
+## setting up Elastic Container Service (ECS) cluster
+Amazon ECS is a lower level resource for dealing with Docker container management.
+### Let’s create a ECS cluster:
+ ```
+ resource "aws_ecs_cluster" "main" {
+  name = var.name
+
+  tags = {
+    Name = var.cluster_tag_name
+  }
+}
+```
+###  a task definition :
+```
+resource "aws_ecs_task_definition" "main" {
+  family             = var.family_name
+  task_role_arn = aws_iam_role.task_role.arn
+  execution_role_arn = aws_iam_role.main_ecs_tasks.arn
+  network_mode       = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu    = var.fargate_cpu
+  memory = var.fargate_memory
+  container_definitions = jsonencode([
+    {
+      name : var.container_name,
+      image : var.app_image,
+      cpu : var.fargate_cpu,
+      memory : var.fargate_memory,
+      networkMode : "awsvpc",
+      portMappings : [
+        {
+          name: var.port_mapping,
+          containerPort : var.app_port
+          protocol : "tcp",
+          hostPort : var.app_port,
+          appProtocol: "http"
+        }
+      ],
+            "essential": true,
+            "environment": jsondecode(file("${var.env_file}")),
+      "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": var.logs,
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+    }
+  ])
+}
+```
+
+###  a service to create instances of the task definition :
+```
+resource "aws_ecs_service" "main" {
+  name            = "${var.family_name}-service"
+  cluster         = var.cluster_id
+  task_definition = aws_ecs_task_definition.main.family
+  desired_count   = var.app_count
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    security_groups = ["${aws_security_group.ecs_tasks.id}"]
+    subnets         = var.private_subnet_ids
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.tg.arn
+    container_name   = var.family_name
+    container_port   = var.app_port
+  }
+
+  service_connect_configuration {
+    enabled = true
+    namespace = var.namespace
+    service {
+       port_name =  var.port_mapping
+      client_alias {
+        port     = var.service_connect_port
+        dns_name = var.dns_name
+      }
+    }
+  }
+
+  depends_on = [
+    aws_ecs_task_definition.main,
+  ]
+}
+```
+
+## setting up Network Load Balancer
+We’re going to be running our service behind a Network Load Balancer associated with the private subnets and will distribute traffic across the tasks that are associated with the service. Network Load Balancers operate at the connection level (Layer 4) and are capable of handling millions of requests per second, while maintaining ultra-low latency. If you’re looking for extreme performance as opposed to intelligent routing (ALB) this is the load balancer to use. It is important to note that you cannot associate security groups with Network Load Balancers, but you can if you’re using Application Load Balancers.
+
+You’ll notice that in this section we’ll also setup a target group for our NLB which we associate with the ECS Service.
+
+```
+resource "aws_lb" "nlb" {
+  name               = "nlb"
+  internal           = true
+  load_balancer_type = "network"
+  subnets            = var.private_subnet_ids
+
+  enable_deletion_protection = false
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
+Target group for alb
+resource "aws_lb_target_group" "tg" {
+  depends_on  = [
+    aws_lb.nlb
+  ]
+  name        = var.tg_name
+  port        = var.app_port
+  protocol    = "TCP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+}
+
+
+Redirect all traffic from the NLB to the application load balancer as a target group
+resource "aws_lb_listener" "nlb_listener" {
+  load_balancer_arn = aws_lb.nlb.arn
+  port              = var.app_port
+  protocol    = "TCP"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.tg.arn
+    type             = "forward"
+  }
+}
+```
+
+
+## Creating an API Gateway & VPC Link
+we’ll be creating a RESTful API that will proxy incoming requests to our private VPC resources. To accomplish this we’ll have to create a private integration with a VPC Link to encapsulate connections between API Gateway and the targeted VPC resource, which is our Network Load Balancer.
+### Example skipper server
+```
+resource "aws_api_gateway_vpc_link" "this" {
+  name = "vpc-link-${var.name}"
+  target_arns = [var.nlb_arn]
+}
+
+resource "aws_api_gateway_rest_api" "main" {
+  name = "api-gateway-${var.name}"
+}
+
+
+
+resource "aws_api_gateway_resource" "main" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  path_part   = "skipper"
+}
+
+resource "aws_api_gateway_resource" "proxy" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_resource.main.id}"
+  path_part   = var.path_part
+}
+
+resource "aws_api_gateway_method" "main" {
+  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
+  resource_id   = "${aws_api_gateway_resource.proxy.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+}
+resource "aws_api_gateway_integration" "main" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  resource_id = "${aws_api_gateway_resource.proxy.id}"
+  http_method = "${aws_api_gateway_method.main.http_method}"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+
+  type                    = var.integration_input_type
+  uri                     = "http://${var.nlb_dns_name}:7577/{proxy}"
+  integration_http_method = var.integration_http_method
+
+  connection_type = "VPC_LINK"
+  connection_id   = "${aws_api_gateway_vpc_link.this.id}"
+}
+```
+
+
 
 
 

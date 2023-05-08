@@ -1,4 +1,4 @@
-  resource "aws_ecs_cluster" "main" {
+resource "aws_ecs_cluster" "main" {
   name = var.name
 
   tags = {
