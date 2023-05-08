@@ -177,10 +177,8 @@ This repository contains the source code for a containerised application in AWS 
 | <a href="enabled_cloudwatch_logs_exports">enabled_cloudwatch_logs_exports</a>| enabled cloudwatch logs exports or not | `bool` | n/a | yes 
 
 
-
-
 # steps to deploy dataflow infrastructure
-## create s3 bucket as a backend for our terraform state
+## create s3 bucket as a remote backend for our terraform state
   ```
 terraform {
   required_version = ">=0.12"
@@ -191,7 +189,7 @@ terraform {
   }
 }
   ```
-## Push Container Image to ECR
+## Push Docker Image to ECR
 The main thing we want to achieve on this part is to push a dataflow, skipper, app stream... docker images to an AWS ECR repository
   1. Authenticate to AWS ECR,
   ```
