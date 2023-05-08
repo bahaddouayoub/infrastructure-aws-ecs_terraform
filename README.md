@@ -37,8 +37,17 @@ This repository contains the source code for a containerised application in AWS 
 
 | Name | Type |
 |------|------|
-| [aws_instance.instance_1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
-| [aws_instance.instance_2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
+|<a href="vpc">Amazon Virtual Private Cloud</a> | resource |
+|<a href="ecs">Amazon Elastic Container Service (Amazon ECS)</a> | resource |
+|<a href="elb">Network Load Balancer</a> | resource |
+|<a href="msk">Amazon Managed Streaming for Apache Kafka(Amazon MSK)</a> | resource |
+|<a href="rds">Amazon Managed Relational Database - Amazon RDS</a> | resource |
+|<a href="api-gateway">Amazon API Gateway</a> | resource |
+|<a href="cloudmap"> AWS Cloud Map</a> | resource |
+|<a href="cloudwatch"> Amazon CloudWatch</a> | resource |
+|<a href="s3">  Amazon Simple Storage Service (Amazon S3) </a> | resource |
+|<a href="ecr">  Amazon Elastic Container Registry </a> | resource |
+
 
 ## vpc_for_ecs_fargate module Inputs 
 
