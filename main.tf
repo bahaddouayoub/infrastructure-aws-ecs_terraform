@@ -4,9 +4,11 @@ module "vpc_for_ecs_fargate" {
   environment                = var.environment
   vpc_tag_name               = var.vpc_tag_name
   vpc_cidr_block             = var.vpc_cidr_block
-  number_of_private_subnets  = 3
+  number_of_private_subnets  = var.number_of_private_subnets 
   private_subnet_tag_name    = var.private_subnet_tag_name
+  public_subnet_tag_name    = var.public_subnet_tag_name
   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
+  public_subnet_cidr_blocks = var.public_subnet_cidr_blocks
   availability_zones         = var.availability_zones
   region                     = var.region
 }
@@ -53,6 +55,7 @@ module "fargate_cluster_movie" {
   app_count                     = var.app_count
   security_group_ecs_tasks_name = var.security_group_ecs_tasks_name_movie
   private_subnet_ids            = module.vpc_for_ecs_fargate.private_subnet_ids
+  public_subnet_ids             = module.vpc_for_ecs_fargate.public_subnet_ids
 
 }
 
@@ -82,25 +85,53 @@ module "fargate_cluster_home" {
   app_count                     = var.app_count
   security_group_ecs_tasks_name = var.security_group_ecs_tasks_name_home
   private_subnet_ids            = module.vpc_for_ecs_fargate.private_subnet_ids
-
+  public_subnet_ids             = module.vpc_for_ecs_fargate.public_subnet_ids
 }
 
-# API Gateway and VPC link
-module "api_gateway" {
-  source                 = "./api-gateway"
-  name                   = var.environment
-  integration_input_type = "HTTP_PROXY"
-  path_part              = "{proxy+}"
-  nlb_dns_name           = module.fargate_cluster_movie.nlb_dns_name
-  nlb_arn                = module.fargate_cluster_movie.nlb_arn
-  environment            = var.environment
+# ECS task definition and service for kafka
+module "fargate_cluster_kafka" {
+  # Task definition and NLB
+  source         = "./fargate-cluster"
+  family_name    = "kafka-console"
+  env_file       = var.kafka_console_env_file
+  dns_name       = var.kafka_console_dns_name
+  container_name = var.kafka_console_container_name
+  app_image      = var.app_image_kafka_console
+  namespace      = var.namespace
+  port_mapping   = var.kafka_console_port_mapping
+  fargate_cpu    = 1024
+  fargate_memory = 2048
+  app_port       = var.app_port_kafka_console
+  vpc_id         = module.vpc_for_ecs_fargate.vpc_id
+  logs           = "/ecs/kafka-console/logs"
+  environment    = var.environment
+  tg_name        = var.tg_name_kafka_console
+
+  # Service
+  service_connect_port          = 9394
+  cluster_id                    = module.ecs_cluster.id
+  app_count                     = var.app_count
+  security_group_ecs_tasks_name = var.security_group_ecs_tasks_name_kafka_console
+  private_subnet_ids            = module.vpc_for_ecs_fargate.private_subnet_ids
+  public_subnet_ids             = module.vpc_for_ecs_fargate.public_subnet_ids
 }
+
+# # API Gateway and VPC link
+# module "api_gateway" {
+#   source                 = "./api-gateway"
+#   name                   = var.environment
+#   integration_input_type = "HTTP_PROXY"
+#   path_part              = "{proxy+}"
+#   nlb_dns_name           = module.fargate_cluster_movie.nlb_dns_name
+#   nlb_arn                = module.fargate_cluster_movie.nlb_arn
+#   environment            = var.environment
+# }
 
 
 # RDS postgresql
 module "rds_postgresql" {
   source                          = "./rds-postgres"
-  subnet_ids                      = module.vpc_for_ecs_fargate.private_subnet_ids
+  subnet_ids                      = module.vpc_for_ecs_fargate.public_subnet_ids
   vpc_id                          = module.vpc_for_ecs_fargate.vpc_id
   parameter_group_name            = var.parameter_group_name
   parameter_group_family          = var.parameter_group_family

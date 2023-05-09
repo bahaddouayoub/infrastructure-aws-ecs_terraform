@@ -81,6 +81,12 @@ variable "private_subnet_ids" {
   description = "the private_subnet_ids "
 }
 
+# Application load balancer variables
+variable "public_subnet_ids" {
+  type = list(string) 
+  description = "the private_subnet_ids "
+}
+
 
 variable "security_group_ecs_tasks_name" {
   type        = string
@@ -95,42 +101,18 @@ variable "security_group_ecs_tasks_description" {
   description = "ECS tasks security group description"
 }
 
-# variable "alb_sg" {
-#   type        = string
-#   description = "alb trafic from alb-sg to ecs tasks"
-# }
 
-variable "health_check_path" {
-  type = string 
-  description = "the health_check_path "
-}
-
-# variable "path_pattern" {
+# variable "health_check_path" {
 #   type = string 
-#   description = "the path_pattern "
-# }
-
-# variable "aws_lb" {
-#   # type = string 
-#   description = "Application load balancer"
+#   description = "the health_check_path "
 # }
 
 
-# variable "aws_lb_listener_arn" {
-#   type = string 
-#   description = "aws_lb listener_arn"
-# }
 
 variable "tg_name" {
   type = string
   description = "target group"
 }
-
-# variable "priority" {
-#   type = number
-#   description = "target group"
-# }
-
 
 variable "service_connect_port" {
   type = number

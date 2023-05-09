@@ -97,6 +97,52 @@ resource "aws_api_gateway_integration" "dataflow" {
 
 
 
+# kafka_konsole resource
+resource "aws_api_gateway_resource" "kafka_konsole" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  path_part   = "kafka-konsole"
+}
+
+resource "aws_api_gateway_resource" "kafka_konsole_proxy" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_resource.kafka_konsole.id}"
+  path_part   = var.path_part
+}
+
+
+
+resource "aws_api_gateway_method" "kafka_konsole" {
+  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
+  resource_id   = "${aws_api_gateway_resource.kafka_konsole_proxy.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+}
+
+
+resource "aws_api_gateway_integration" "kafka_konsole" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  resource_id = "${aws_api_gateway_resource.kafka_konsole_proxy.id}"
+  http_method = "${aws_api_gateway_method.kafka_konsole.http_method}"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+
+  type                    = var.integration_input_type
+  uri                     = "http://${var.nlb_dns_name}:8080/{proxy}"
+  integration_http_method = var.integration_http_method
+
+  connection_type = "VPC_LINK"
+  connection_id   = "${aws_api_gateway_vpc_link.this.id}"
+}
+
+
+
 
 
 

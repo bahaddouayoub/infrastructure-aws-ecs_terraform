@@ -9,8 +9,46 @@ resource "aws_vpc" "custom_vpc" {
   }
 }
 
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.custom_vpc.id
 
-# Create the private subnets
+  tags = {
+    Name = "igw-${var.environment}"
+  }
+}
+
+resource "aws_route_table" "rt" {
+    vpc_id= aws_vpc.custom_vpc.id
+    route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+    }
+    tags = {
+        Name: "rtb-${var.environment}"
+    }
+}
+
+#Create the private subnets for rds postgres databases
+resource "aws_subnet" "public_subnet" {
+  count = var.number_of_private_subnets
+  vpc_id            = "${aws_vpc.custom_vpc.id}"
+  cidr_block = "${element(var.public_subnet_cidr_blocks, count.index)}"
+  availability_zone = "${element(var.availability_zones, count.index)}"
+
+  tags = {
+    Name = "${var.public_subnet_tag_name}-${count.index}-${var.environment}"
+  }
+}
+
+resource "aws_route_table_association" "rt_association" {
+    count = 2
+    subnet_id= aws_subnet.public_subnet[count.index].id
+    route_table_id= aws_route_table.rt.id
+    depends_on = [aws_internet_gateway.gw, aws_subnet.public_subnet]
+}
+
+
+#Create the private subnets for rds postgres databases
 resource "aws_subnet" "private_subnet" {
   count = var.number_of_private_subnets
   vpc_id            = "${aws_vpc.custom_vpc.id}"

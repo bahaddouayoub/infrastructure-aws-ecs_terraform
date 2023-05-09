@@ -64,9 +64,9 @@ resource "aws_security_group" "ecs_tasks" {
 # networ load balancer
 resource "aws_lb" "nlb" {
   name               = "nlb"
-  internal           = true
+  internal           = false
   load_balancer_type = "network"
-  subnets            = var.private_subnet_ids
+  subnets            = var.public_subnet_ids 
 
   enable_deletion_protection = false
 
@@ -80,7 +80,7 @@ resource "aws_lb_target_group" "tg" {
   depends_on  = [
     aws_lb.nlb
   ]
-  name        = var.tg_name
+  name        = "${var.tg_name}-prod"
   port        = var.app_port
   protocol    = "TCP"
   target_type = "ip"

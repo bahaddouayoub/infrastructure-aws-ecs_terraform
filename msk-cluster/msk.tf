@@ -1,7 +1,7 @@
 resource "aws_msk_cluster" "msk_cluster" {
   cluster_name           = var.cluster_name 
   kafka_version          = "2.8.1"
-  number_of_broker_nodes = 3
+  number_of_broker_nodes = 2
 
   broker_node_group_info {
     instance_type = "kafka.t3.small"

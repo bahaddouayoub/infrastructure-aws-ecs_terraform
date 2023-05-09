@@ -41,7 +41,7 @@ resource "aws_db_parameter_group" "peaq_ock_db" {
 }
 
 resource "aws_db_instance" "peaq_ock_db" {
-  identifier             = "peaq-ock-db"
+  identifier             = "peaq-ock-db-server"
 
   allocated_storage     = var.allocated_storage
   max_allocated_storage = var.max_allocated_storage
@@ -52,7 +52,7 @@ resource "aws_db_instance" "peaq_ock_db" {
   instance_class         = var.instance_class
   engine                 = "postgres"
   engine_version         = "14.1"
-  publicly_accessible    = false
+  publicly_accessible    = true
 
   username               = var.db_username
   password               = var.db_password

@@ -25,7 +25,7 @@
     },
     {
       "name": "SPRING_DATASOURCE_URL",
-      "value": "jdbc:postgresql://database-2.cr7njsrnvjdg.us-east-1.rds.amazonaws.com:5432/dataflow"
+      "value": "jdbc:postgresql://database-data.clzmtwriywjg.us-east-1.rds.amazonaws.com:5432/dataflow"
     },
     {
       "name": "SPRING_DATASOURCE_USERNAME",

@@ -12,7 +12,9 @@ variable "skipper_env_file" {
   description = "skipper env_file"
   type        = string
 }
-variable "kafka_env_file" {
+
+
+variable "dataflow_env_file" {
   description = "kafka env_file"
   type        = string
 }
@@ -48,31 +50,21 @@ variable "private_subnet_tag_name" {
   description = "Name tag for the private subnet"
 }
 
+variable "public_subnet_tag_name" {
+  type        = string
+  description = "Name tag for the publicsubnet"
+}
+
 variable "security_group_ecs_tasks_name" {
   type        = string
   default     = "ecs-tasks-sg"
   description = "ECS Tasks security group name"
 }
 
-
-variable "security_group_lb_name" {
-  type        = string
-  default     = "alb-sg"
-  description = "alb security group name"
-}
-
-
 variable "security_group_ecs_tasks_description" {
   type        = string
   default     = "allow inbound access from the ECS ALB only"
   description = "ECS tasks security group description"
-}
-
-
-variable "security_group_lb_description" {
-  type        = string
-  default     = "allow inbound access from the vpc"
-  description = "alb security group description"
 }
 
 
@@ -86,6 +78,12 @@ variable "private_subnet_cidr_blocks" {
   type        = list(string)
   default     = ["10.0.0.0/24", "10.0.4.0/24"]
   description = "CIDR block range for the private subnets"
+}
+
+variable "public_subnet_cidr_blocks" {
+  type        = list(string)
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
+  description = "CIDR block range for the public subnets"
 }
 
 variable "cluster_tag_name" {
@@ -135,20 +133,12 @@ variable "home_dns_name" {
   description = "domain name that will for service to service communication"
 }
 
-# variable "health_check_path_home" {
-#   type        = string
-#   description = "health_check_path_home"
-# }
 
 variable "tg_name_home" {
   type        = string
   description = "tg_name_home"
 }
 
-# variable "path_pattern_home" {
-#   type        = string
-#   description = "the path_pattern home"
-# }
 
 variable "app_image_home" {
   type        = string
@@ -162,22 +152,11 @@ variable "app_image_movie" {
 }
 
 
-# variable "health_check_path_movie" {
-#   type        = string
-#   description = "health_check_path_movie"
-# }
-
-
 variable "tg_name_movie" {
   type        = string
   description = "tg_name_movie"
 }
 
-
-# variable "path_pattern_movie" {
-#   type        = string
-#   description = "the path_pattern movie"
-# }
 
 variable "security_group_ecs_tasks_name_movie" {
   type        = string
@@ -208,7 +187,46 @@ variable "namespace" {
   description = "default namespace"
 }
 
-# rds variables
+
+########################################### kafka variables
+variable "app_image_kafka_console" {
+  type        = string
+  description = "docker images"
+}
+variable "kafka_console_dns_name" {
+  type        = string
+  description = "domain name that we use for service to service communication"
+}
+variable "kafka_console_family_name" {
+  type        = string
+  description = "docker images"
+}
+variable "kafka_console_container_name" {
+  type        = string
+  description = "docker images"
+}
+variable "kafka_console_port_mapping" {
+  type        = string
+  description = "docker images"
+}
+variable "app_port_kafka_console" {
+  type        = number
+  description = "docker images"
+}
+variable "tg_name_kafka_console" {
+  type        = string
+  description = "tg_name_kafka_console"
+}
+variable "security_group_ecs_tasks_name_kafka_console" {
+  type        = string
+  description = "docker images"
+}
+variable "kafka_console_env_file" {
+  description = "kafka env_file"
+  type        = string
+}
+
+############################################### rds variables
 variable "db_password" {
   description = "RDS root user password"
   sensitive   = true
