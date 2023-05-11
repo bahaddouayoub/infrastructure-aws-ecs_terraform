@@ -55,13 +55,12 @@ resource "aws_route_table" "private_rt" {
     vpc_id= aws_vpc.custom_vpc.id
     route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
     }
     tags = {
         Name: "priavte-rtb-${var.environment}"
     }
 }
-
 
 # Route table and subnet associations
 resource "aws_route_table_association" "rt_association" {
@@ -79,11 +78,10 @@ resource "aws_route_table_association" "subnet_route_assoc" {
 }
 
 # Nat Gateway
-
 resource "aws_eip" "ip" {
   vpc      = true
 }
-resource "aws_nat_gateway" "nat" {
+resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = aws_eip.ip.id
   subnet_id     = aws_subnet.public_subnet[1].id
 
