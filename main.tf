@@ -4,11 +4,11 @@ module "vpc_for_ecs_fargate" {
   environment                = var.environment
   vpc_tag_name               = var.vpc_tag_name
   vpc_cidr_block             = var.vpc_cidr_block
-  number_of_private_subnets  = var.number_of_private_subnets 
+  number_of_private_subnets  = var.number_of_private_subnets
   private_subnet_tag_name    = var.private_subnet_tag_name
-  public_subnet_tag_name    = var.public_subnet_tag_name
+  public_subnet_tag_name     = var.public_subnet_tag_name
   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
-  public_subnet_cidr_blocks = var.public_subnet_cidr_blocks
+  public_subnet_cidr_blocks  = var.public_subnet_cidr_blocks
   availability_zones         = var.availability_zones
   region                     = var.region
 }
@@ -27,28 +27,29 @@ module "msk_cluster" {
   cluster_name       = "msk-cluster-${var.environment}"
   private_subnet_ids = module.vpc_for_ecs_fargate.private_subnet_ids
   vpc_id             = module.vpc_for_ecs_fargate.vpc_id
+  tasks_sg           = module.fargate_cluster_movie.task_sg
 }
 
 
 # ECS task definition and service for movie
 module "fargate_cluster_movie" {
   # Task definition and NLB
-  source         = "./fargate-cluster"
-  family_name    = "skipper-server"
-  env_file       = var.skipper_env_file
-  dns_name       = var.movie_dns_name
-  container_name = var.movie_container_name
-  app_image      = var.app_image_movie
-  namespace      = var.namespace
-  port_mapping   = var.movie_port_mapping
-  fargate_cpu    = 1024
-  fargate_memory = 2048
-  app_port       = var.app_port_movie
-  vpc_id         = module.vpc_for_ecs_fargate.vpc_id
-  logs           = "/ecs/skipper2/logs"
-  environment    = var.environment
-  tg_name        = var.tg_name_movie
-
+  source            = "./fargate-cluster"
+  family_name       = "skipper-server"
+  env_file          = var.skipper_env_file
+  dns_name          = var.movie_dns_name
+  container_name    = var.movie_container_name
+  app_image         = var.app_image_movie
+  namespace         = var.namespace
+  port_mapping      = var.movie_port_mapping
+  fargate_cpu       = 1024
+  fargate_memory    = 2048
+  app_port          = var.app_port_movie
+  vpc_id            = module.vpc_for_ecs_fargate.vpc_id
+  logs              = "/ecs/skipper2/logs"
+  environment       = var.environment
+  tg_name           = var.tg_name_movie
+  bootstrap_brokers = module.msk_cluster.bootstrap_brokers
   # Service
   service_connect_port          = 7578
   cluster_id                    = module.ecs_cluster.id
@@ -63,21 +64,22 @@ module "fargate_cluster_movie" {
 # ECS task definition and service for home
 module "fargate_cluster_home" {
   # Task definition and NLB
-  source         = "./fargate-cluster"
-  family_name    = "dataflow-server"
-  env_file       = var.skipper_env_file
-  dns_name       = var.home_dns_name
-  container_name = var.home_container_name
-  app_image      = var.app_image_home
-  namespace      = var.namespace
-  port_mapping   = var.home_port_mapping
-  fargate_cpu    = 1024
-  fargate_memory = 2048
-  app_port       = var.app_port_home
-  vpc_id         = module.vpc_for_ecs_fargate.vpc_id
-  logs           = "/ecs/dataflow/logs"
-  environment    = var.environment
-  tg_name        = var.tg_name_home
+  source            = "./fargate-cluster"
+  family_name       = "dataflow-server"
+  env_file          = var.dataflow_env_file  
+  dns_name          = var.home_dns_name
+  container_name    = var.home_container_name
+  app_image         = var.app_image_home
+  namespace         = var.namespace
+  port_mapping      = var.home_port_mapping
+  fargate_cpu       = 4096
+  fargate_memory    = 8192
+  app_port          = var.app_port_home
+  vpc_id            = module.vpc_for_ecs_fargate.vpc_id
+  logs              = "/ecs/dataflow/logs"
+  environment       = var.environment
+  tg_name           = var.tg_name_home
+  bootstrap_brokers = module.msk_cluster.bootstrap_brokers
 
   # Service
   service_connect_port          = 9394
@@ -91,21 +93,22 @@ module "fargate_cluster_home" {
 # ECS task definition and service for kafka
 module "fargate_cluster_kafka" {
   # Task definition and NLB
-  source         = "./fargate-cluster"
-  family_name    = "kafka-console"
-  env_file       = var.kafka_console_env_file
-  dns_name       = var.kafka_console_dns_name
-  container_name = var.kafka_console_container_name
-  app_image      = var.app_image_kafka_console
-  namespace      = var.namespace
-  port_mapping   = var.kafka_console_port_mapping
-  fargate_cpu    = 1024
-  fargate_memory = 2048
-  app_port       = var.app_port_kafka_console
-  vpc_id         = module.vpc_for_ecs_fargate.vpc_id
-  logs           = "/ecs/kafka-console/logs"
-  environment    = var.environment
-  tg_name        = var.tg_name_kafka_console
+  source            = "./fargate-cluster"
+  family_name       = "kafka-console"
+  env_file          = var.kafka_console_env_file
+  dns_name          = var.kafka_console_dns_name
+  container_name    = var.kafka_console_container_name
+  app_image         = var.app_image_kafka_console
+  namespace         = var.namespace
+  port_mapping      = var.kafka_console_port_mapping
+  fargate_cpu       = 1024
+  fargate_memory    = 2048
+  app_port          = var.app_port_kafka_console
+  vpc_id            = module.vpc_for_ecs_fargate.vpc_id
+  logs              = "/ecs/kafka-console/logs"
+  environment       = var.environment
+  tg_name           = var.tg_name_kafka_console
+  bootstrap_brokers = module.msk_cluster.bootstrap_brokers
 
   # Service
   service_connect_port          = 9394

@@ -57,6 +57,7 @@ resource "aws_db_instance" "peaq_ock_db" {
   username               = var.db_username
   password               = var.db_password
   port                   = var.db_port
+  db_name                = "dataflow"
 
   db_subnet_group_name   = aws_db_subnet_group.peaq_ock_db.name
   vpc_security_group_ids = [aws_security_group.rds.id]
@@ -68,4 +69,15 @@ resource "aws_db_instance" "peaq_ock_db" {
 
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports ? ["postgresql", "upgrade"] : []
 
+}
+
+
+resource "aws_secretsmanager_secret" "secret_manager" {
+  name                    = "weather-tracker-rds-password"
+  recovery_window_in_days = 0 // Overriding the default recovery window of 30 days
+}
+
+resource "aws_secretsmanager_secret_version" "secret_version" {
+  secret_id     = aws_secretsmanager_secret.secret_manager.id
+  secret_string = "{\"username\":\"${var.db_username}\", \"password\":\"${var.db_password}\"}"
 }

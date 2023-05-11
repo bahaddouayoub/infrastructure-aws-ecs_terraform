@@ -3,10 +3,10 @@ variable "private_subnet_ids" {
     description = "private subnets ids"  
 }
 
-# variable "tasks_sg" {
-#     type = string
-#     description = "alb trafic from ecs tasks to msk cluster"
-# }
+variable "tasks_sg" {
+    type = string
+    description = "allow trafic from ecs tasks to msk cluster"
+}
  
 variable "cluster_name" {
     type = string

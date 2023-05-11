@@ -17,18 +17,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-resource "aws_route_table" "rt" {
-    vpc_id= aws_vpc.custom_vpc.id
-    route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
-    }
-    tags = {
-        Name: "rtb-${var.environment}"
-    }
-}
-
-#Create the private subnets for rds postgres databases
+#Create the public subnets
 resource "aws_subnet" "public_subnet" {
   count = var.number_of_private_subnets
   vpc_id            = "${aws_vpc.custom_vpc.id}"
@@ -39,16 +28,7 @@ resource "aws_subnet" "public_subnet" {
     Name = "${var.public_subnet_tag_name}-${count.index}-${var.environment}"
   }
 }
-
-resource "aws_route_table_association" "rt_association" {
-    count = 2
-    subnet_id= aws_subnet.public_subnet[count.index].id
-    route_table_id= aws_route_table.rt.id
-    depends_on = [aws_internet_gateway.gw, aws_subnet.public_subnet]
-}
-
-
-#Create the private subnets for rds postgres databases
+#Create the private subnets 
 resource "aws_subnet" "private_subnet" {
   count = var.number_of_private_subnets
   vpc_id            = "${aws_vpc.custom_vpc.id}"
@@ -60,13 +40,67 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+#Create public and private route table
+resource "aws_route_table" "public_rt" {
+    vpc_id= aws_vpc.custom_vpc.id
+    route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+    }
+    tags = {
+        Name: "public-rtb-${var.environment}"
+    }
+}
+resource "aws_route_table" "private_rt" {
+    vpc_id= aws_vpc.custom_vpc.id
+    route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+    }
+    tags = {
+        Name: "priavte-rtb-${var.environment}"
+    }
+}
+
+
+# Route table and subnet associations
+resource "aws_route_table_association" "rt_association" {
+    count = var.number_of_private_subnets
+    subnet_id= aws_subnet.public_subnet[count.index].id
+    route_table_id= aws_route_table.public_rt.id
+    depends_on = [aws_internet_gateway.gw, aws_subnet.public_subnet]
+}
+
+resource "aws_route_table_association" "subnet_route_assoc" {
+  count = var.number_of_private_subnets
+  subnet_id      = aws_subnet.private_subnet[count.index].id
+  route_table_id = aws_route_table.private_rt.id
+  depends_on = [aws_subnet.private_subnet]
+}
+
+# Nat Gateway
+
+resource "aws_eip" "ip" {
+  vpc      = true
+}
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.ip.id
+  subnet_id     = aws_subnet.public_subnet[1].id
+
+  tags = {
+    Name = "NAT Gateway - ${var.environment}"
+  }
+  # To ensure proper ordering, it is recommended to add an explicit dependency.
+}
+
+
 
 # AWS services through an AWS PrivateLink
 resource "aws_security_group" "privatelink_sg" {
     lifecycle {
     ignore_changes = [name]
   }
-  name        = "privatelinks-sg"
+  name        = "privatelinks-sg-${var.environment}"
   description = "allow between subnet and ecr s3 cloudwatch"
   vpc_id      = "${aws_vpc.custom_vpc.id}"
 
@@ -100,14 +134,6 @@ resource "aws_security_group" "privatelink_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-# Route table and subnet associations
-resource "aws_route_table_association" "subnet_route_assoc" {
-  count = var.number_of_private_subnets
-  subnet_id      = aws_subnet.private_subnet[count.index].id
-  route_table_id = aws_vpc.custom_vpc.default_route_table_id
-}
-
 
 ##PrivateLink VPC privatelink_sg
 

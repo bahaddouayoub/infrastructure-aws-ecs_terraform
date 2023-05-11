@@ -75,13 +75,23 @@ variable "namespace" {
   description = "the namespace used in service connect"
 }
 
-# Application load balancer variables
+variable "bootstrap_brokers" {
+  type = string 
+  default = null
+  description = "the Kafka bootstrap_brokers"
+}
+
+variable "rds_endpoint" {
+  type = string 
+  default = null
+  description = "the rds postgres endpoint"
+}
+
 variable "private_subnet_ids" {
   type = list(string) 
   description = "the private_subnet_ids "
 }
 
-# Application load balancer variables
 variable "public_subnet_ids" {
   type = list(string) 
   description = "the private_subnet_ids "

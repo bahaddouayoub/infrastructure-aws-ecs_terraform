@@ -4,10 +4,12 @@ resource "aws_ecs_service" "main" {
   task_definition = aws_ecs_task_definition.main.family
   desired_count   = var.app_count
   launch_type     = "FARGATE"
+  
 
   network_configuration {
     security_groups = ["${aws_security_group.ecs_tasks.id}"]
     subnets         = var.private_subnet_ids
+    # assign_public_ip= true
   }
 
   load_balancer {
@@ -42,17 +44,9 @@ resource "aws_security_group" "ecs_tasks" {
   ingress {
     protocol    = "tcp"
     from_port   = var.app_port
-    to_port     = var.app_port
+    to_port     = var.app_port+1
     cidr_blocks = ["11.0.0.0/16"]
   }
-
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
 
   egress {
     protocol    = "-1"
@@ -63,7 +57,7 @@ resource "aws_security_group" "ecs_tasks" {
 }
 # networ load balancer
 resource "aws_lb" "nlb" {
-  name               = "nlb"
+  name               = "nlb-${var.environment}"
   internal           = false
   load_balancer_type = "network"
   subnets            = var.public_subnet_ids 
@@ -80,7 +74,7 @@ resource "aws_lb_target_group" "tg" {
   depends_on  = [
     aws_lb.nlb
   ]
-  name        = "${var.tg_name}-prod"
+  name        = "${var.tg_name}-${var.environment}"
   port        = var.app_port
   protocol    = "TCP"
   target_type = "ip"

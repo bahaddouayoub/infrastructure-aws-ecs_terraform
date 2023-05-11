@@ -1,5 +1,5 @@
 region                               = "us-east-1"
-environment                          = "prod"
+environment                          = "dev"
 vpc_tag_name                         = "vpc"
 number_of_private_subnets            = 2
 private_subnet_tag_name              = "private-subnet"
@@ -17,7 +17,7 @@ app_count        = "1"
 
 
 #dataflow server config
-app_image_home                     = "531467643755.dkr.ecr.us-east-1.amazonaws.com/dataflow-server:dataflow"
+app_image_home                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:dataflow"
 home_dns_name                      = "dataflow-server"
 home_family_name                   = "dataflow-server"
 home_container_name                = "dataflow-server"
@@ -28,7 +28,7 @@ security_group_ecs_tasks_name_home = "dataflow-server-task-sg"
 dataflow_env_file                  = "container-config/dataflow.json"
 
 #skipper server config
-app_image_movie                     = "531467643755.dkr.ecr.us-east-1.amazonaws.com/skipper-server:skipper"
+app_image_movie                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:skipper"
 movie_dns_name                      = "skipper-server"
 movie_family_name                   = "skipper-server"
 movie_container_name                = "skipper-server"
@@ -40,7 +40,7 @@ skipper_env_file                    = "container-config/skipper.json"
 
 
 #kafka-console server config
-app_image_kafka_console                     = "531467643755.dkr.ecr.us-east-1.amazonaws.com/kafka-server:kafka"
+app_image_kafka_console                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:console"
 kafka_console_dns_name                      = "kafka-console"
 kafka_console_family_name                   = "kafka-console"
 kafka_console_container_name                = "kafka-console"
@@ -62,7 +62,7 @@ allocated_storage               = 100
 max_allocated_storage           = 500
 storage_type                    = "io1"
 instance_class                  = "db.t3.medium"
-skip_final_snapshot             = false
+skip_final_snapshot             = true
 multi_az                        = false
-enabled_cloudwatch_logs_exports = true
+enabled_cloudwatch_logs_exports = false
 param_log_statement             = "none"

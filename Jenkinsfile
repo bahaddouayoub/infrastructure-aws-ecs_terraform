@@ -1,5 +1,4 @@
 #!/usr/bin/env groovy
-
 pipeline {
     agent any
     environment { 	
@@ -17,6 +16,44 @@ pipeline {
                     }
                 }
             }
+  stage('pull docker image') {
+    steps {
+      sh 'docker pull springcloud/spring-cloud-dataflow-server:2.11.0-SNAPSHOT'
+      sh 'docker pull springcloud/spring-cloud-skipper-server:2.11.0-SNAPSHOT'
+      sh 'docker pull docker.redpanda.com/vectorized/console:latest'
+      sh 'docker pull springcloud/baseimage:1.0.4'
+    }
+  }
+
+  stage('Create Repositories') {
+    steps {
+      sh 'aws ecr create-repository --repository-name dataflow --region us-east-1'
+      sh 'aws ecr create-repository --repository-name skipper --region us-east-1'
+      sh 'aws ecr create-repository --repository-name kafka-console --region us-east-1'
+      sh 'aws ecr create-repository --repository-name app-stream --region us-east-1'
+    }
+  }
+
+  stage('Tage docker image') {
+    steps {
+      sh 'docker tag springcloud/spring-cloud-dataflow-server:2.11.0-SNAPSHOT 464635784577.dkr.ecr.us-east-1.amazonaws.com/dataflow:dataflow'
+      sh 'docker tag springcloud/spring-cloud-skipper-server:2.11.0-SNAPSHOT 464635784577.dkr.ecr.us-east-1.amazonaws.com/skipper:skipper'
+      sh 'docker tag docker.redpanda.com/vectorized/console:latest 464635784577.dkr.ecr.us-east-1.amazonaws.com/kafka-console:kafka-console'
+      sh 'docker tag springcloud/baseimage:1.0.4 464635784577.dkr.ecr.us-east-1.amazonaws.com/app-stream:app-stream'
+    }
+  }
+
+  stage('Push docker image') {
+    steps {
+      withCredentials([usernamePassword(credentialsId: 'ecr-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+      sh "echo $PASS | docker login -u $USER --password-stdin"
+      sh 'docker push 464635784577.dkr.ecr.us-east-1.amazonaws.com/dataflow:dataflow'
+      sh 'docker push 464635784577.dkr.ecr.us-east-1.amazonaws.com/skipper:skipper'
+      sh 'docker push 464635784577.dkr.ecr.us-east-1.amazonaws.com/kafka-console:kafka-console'
+      sh 'docker push 464635784577.dkr.ecr.us-east-1.amazonaws.com/app-stream:app-stream'
+      }
+    }
+  }
   stage('Terraform Init') {
     steps {
       sh 'terraform init'

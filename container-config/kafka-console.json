@@ -1,6 +1,6 @@
 
 [{
     "name": "KAFKA_BROKERS",
-    "value": "b-2.mskclusterprod.8p9u72.c11.kafka.us-east-1.amazonaws.com:9092"
+    "value": "b-1.mskclusterdev.npyxhd.c4.kafka.us-east-1.amazonaws.com:9092"
   }
 ]
