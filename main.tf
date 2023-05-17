@@ -50,6 +50,11 @@ module "fargate_cluster_movie" {
   environment       = var.environment
   tg_name           = var.tg_name_movie
   bootstrap_brokers = module.msk_cluster.bootstrap_brokers
+  rds_endpoint      = module.rds_postgresql.rds_endpoint
+  db_username       = var.db_username 
+  db_password       = var.db_password
+  db_name           = var.db_name
+
   # Service
   service_connect_port          = 7578
   cluster_id                    = module.ecs_cluster.id
@@ -66,7 +71,7 @@ module "fargate_cluster_home" {
   # Task definition and NLB
   source            = "./fargate-cluster"
   family_name       = "dataflow-server"
-  env_file          = var.dataflow_env_file  
+  env_file          = var.dataflow_env_file
   dns_name          = var.home_dns_name
   container_name    = var.home_container_name
   app_image         = var.app_image_home
@@ -80,6 +85,10 @@ module "fargate_cluster_home" {
   environment       = var.environment
   tg_name           = var.tg_name_home
   bootstrap_brokers = module.msk_cluster.bootstrap_brokers
+  rds_endpoint      = module.rds_postgresql.rds_endpoint
+  db_username       = var.db_username 
+  db_password       = var.db_password
+  db_name           = var.db_name
 
   # Service
   service_connect_port          = 9394
@@ -146,6 +155,7 @@ module "rds_postgresql" {
   db_username                     = var.db_username
   db_password                     = var.db_password
   db_port                         = var.db_port
+  db_name                         = var.db_name
   multi_az                        = var.multi_az
   skip_final_snapshot             = var.skip_final_snapshot
   backup_retention_period         = var.backup_retention_period

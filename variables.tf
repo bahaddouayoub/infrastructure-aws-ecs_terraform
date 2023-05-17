@@ -243,6 +243,11 @@ variable "db_port" {
   type        = number
 }
 
+variable "db_name" {
+  description = "RDS rdatabase name"
+  type        = string
+}
+
 
 variable "allocated_storage" {
   description = "Allocate storage"

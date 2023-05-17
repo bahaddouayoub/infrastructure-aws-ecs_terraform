@@ -87,6 +87,25 @@ variable "rds_endpoint" {
   description = "the rds postgres endpoint"
 }
 
+variable "db_password" {
+  description = "RDS root user password"
+  sensitive   = true
+  default = null
+  type        = string
+}
+
+variable "db_username" {
+  description = "RDS root username"
+  type        = string
+  default = null
+}
+
+variable "db_name" {
+  description = "RDS rdatabase name"
+  type        = string
+  default     = null
+}
+
 variable "private_subnet_ids" {
   type = list(string) 
   description = "the private_subnet_ids "

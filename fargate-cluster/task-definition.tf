@@ -23,7 +23,7 @@ resource "aws_ecs_task_definition" "main" {
         }
       ],
             "essential": true,
-            "environment": jsondecode(file("${var.env_file}")),
+            "environment": jsondecode(data.template_file.env_file.rendered),
       "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -35,4 +35,17 @@ resource "aws_ecs_task_definition" "main" {
             }
     }
   ])
+}
+
+
+data "template_file" "env_file" {
+    template = file("${var.env_file}")
+
+    vars = {
+        rds_endpoint      = var.rds_endpoint
+        db_username       = var.db_username
+        db_password       = var.db_password
+        db_name           = var.db_name
+        bootstrap_brokers = var.bootstrap_brokers
+    }
 }

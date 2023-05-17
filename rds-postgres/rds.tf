@@ -57,7 +57,7 @@ resource "aws_db_instance" "peaq_ock_db" {
   username               = var.db_username
   password               = var.db_password
   port                   = var.db_port
-  db_name                = "dataflow"
+  db_name                = var.db_name 
 
   db_subnet_group_name   = aws_db_subnet_group.peaq_ock_db.name
   vpc_security_group_ids = [aws_security_group.rds.id]

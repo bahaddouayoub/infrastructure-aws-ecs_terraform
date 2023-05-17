@@ -92,7 +92,6 @@ resource "aws_nat_gateway" "nat_gateway" {
 }
 
 
-
 # AWS services through an AWS PrivateLink
 resource "aws_security_group" "privatelink_sg" {
     lifecycle {

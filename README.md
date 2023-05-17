@@ -4,8 +4,9 @@ This repository contains the source code for a containerised application in AWS 
 
 
 ## Technical Architecture Diagram
-<img src="assets/dataflow-infra.png" alt="infrastructure-terraform" title="infrastructure-terraform">
-
+<img src="assets/infra.jpg" alt="infrastructure-terraform" title="infrastructure-terraform">
+## Network Architecture Diagram
+<img src="assets/network.jpg" alt="infrastructure-terraform" title="infrastructure-terraform">
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -178,6 +179,24 @@ This repository contains the source code for a containerised application in AWS 
 
 
 # steps to deploy dataflow infrastructure
+## setting up the provider:
+  ```
+# Provider Requirements
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~>4.59.0"
+    }
+  }
+}
+
+# AWS Provider (aws) with region
+provider "aws" {
+  region = var.region
+}
+  ```
+
 ## create s3 bucket as a remote backend for our terraform state
   ```
 terraform {
@@ -206,32 +225,110 @@ The main thing we want to achieve on this part is to push a dataflow, skipper, a
   
   
 ## Setting up our VPC Network Infrastructure
-Amazon VPC lets us provision a logically isolated section of the Amazon Web Services Cloud where we can launch our resources in a virtual network that we define
+Amazon VPC lets us provision a logically isolated section of the Amazon Web Services Cloud where we can launch our resources in a virtual network that we define,
+we need to create 2 private Subnets and 2 public Subnets to deploy the network load balancer on the public network.
 ### Custom VPC & Private Subnets
  ```
-  resource "aws_vpc" "custom_vpc" {
-    cidr_block       = var.vpc_cidr_block
-    enable_dns_support = true
-    enable_dns_hostnames = true
+### VPC Network Setup
+resource "aws_vpc" "custom_vpc" {
+  cidr_block       = var.vpc_cidr_block
+  enable_dns_support = true
+  enable_dns_hostnames = true
 
-    tags = {
-      Name = "${var.vpc_tag_name}-${var.environment}"
-    }
+  tags = {
+    Name = "${var.vpc_tag_name}-${var.environment}"
   }
+}
 
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.custom_vpc.id
 
-  # Create the private subnets
-  resource "aws_subnet" "private_subnet" {
+  tags = {
+    Name = "igw-${var.environment}"
+  }
+}
+
+#Create the public subnets
+resource "aws_subnet" "public_subnet" {
+  count = var.number_of_private_subnets
+  vpc_id            = "${aws_vpc.custom_vpc.id}"
+  cidr_block = "${element(var.public_subnet_cidr_blocks, count.index)}"
+  availability_zone = "${element(var.availability_zones, count.index)}"
+
+  tags = {
+    Name = "${var.public_subnet_tag_name}-${count.index}-${var.environment}"
+  }
+}
+#Create the private subnets 
+resource "aws_subnet" "private_subnet" {
+  count = var.number_of_private_subnets
+  vpc_id            = "${aws_vpc.custom_vpc.id}"
+  cidr_block = "${element(var.private_subnet_cidr_blocks, count.index)}"
+  availability_zone = "${element(var.availability_zones, count.index)}"
+
+  tags = {
+    Name = "${var.private_subnet_tag_name}-${count.index}-${var.environment}"
+  }
+}
+
+#Create public and private route table
+resource "aws_route_table" "public_rt" {
+    vpc_id= aws_vpc.custom_vpc.id
+    route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+    }
+    tags = {
+        Name: "public-rtb-${var.environment}"
+    }
+}
+resource "aws_route_table" "private_rt" {
+    vpc_id= aws_vpc.custom_vpc.id
+    route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+    }
+    tags = {
+        Name: "priavte-rtb-${var.environment}"
+    }
+}
+
+# Route table and subnet associations
+resource "aws_route_table_association" "rt_association" {
     count = var.number_of_private_subnets
-    vpc_id            = "${aws_vpc.custom_vpc.id}"
-    cidr_block = "${element(var.private_subnet_cidr_blocks, count.index)}"
-    availability_zone = "${element(var.availability_zones, count.index)}"
+    subnet_id= aws_subnet.public_subnet[count.index].id
+    route_table_id= aws_route_table.public_rt.id
+    depends_on = [aws_internet_gateway.gw, aws_subnet.public_subnet]
+}
 
-    tags = {
-      Name = "${var.private_subnet_tag_name}-${count.index}-${var.environment}"
-    }
-  }
+resource "aws_route_table_association" "subnet_route_assoc" {
+  count = var.number_of_private_subnets
+  subnet_id      = aws_subnet.private_subnet[count.index].id
+  route_table_id = aws_route_table.private_rt.id
+  depends_on = [aws_subnet.private_subnet]
+}
+  
+  
    ```
+   
+### Nat Gateway
+Create a nat gateway that will used by dataflow server to download some maven repository from the maven central over the internet
+  ```
+  # Nat Gateway
+resource "aws_eip" "ip" {
+  vpc      = true
+}
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.ip.id
+  subnet_id     = aws_subnet.public_subnet[1].id
+
+  tags = {
+    Name = "NAT Gateway - ${var.environment}"
+  }
+  # To ensure proper ordering, it is recommended to add an explicit dependency.
+}
+  ```
+
 ### Security Groups
 Create a security group that we’ll attach to our instances for our ECS tasks as well as our VPC endpoint interface components. 
 These are the rules we want to apply to our security group:
@@ -477,7 +574,7 @@ resource "aws_ecs_service" "main" {
 ```
 
 ## setting up Network Load Balancer
-We’re going to be running our service behind a Network Load Balancer associated with the private subnets and will distribute traffic across the tasks that are associated with the service. Network Load Balancers operate at the connection level (Layer 4) and are capable of handling millions of requests per second, while maintaining ultra-low latency. If you’re looking for extreme performance as opposed to intelligent routing (ALB) this is the load balancer to use. It is important to note that you cannot associate security groups with Network Load Balancers, but you can if you’re using Application Load Balancers.
+We’re going to be running our service behind a Network Load Balancer associated with the public subnets and will distribute traffic across the tasks that are associated with the service. Network Load Balancers operate at the connection level (Layer 4) and are capable of handling millions of requests per second, while maintaining ultra-low latency. If you’re looking for extreme performance as opposed to intelligent routing (ALB) this is the load balancer to use. It is important to note that you cannot associate security groups with Network Load Balancers, but you can if you’re using Application Load Balancers.
 
 You’ll notice that in this section we’ll also setup a target group for our NLB which we associate with the ECS Service.
 
@@ -486,7 +583,7 @@ resource "aws_lb" "nlb" {
   name               = "nlb"
   internal           = true
   load_balancer_type = "network"
-  subnets            = var.private_subnet_ids
+  subnets            = var.public_subnet_ids
 
   enable_deletion_protection = false
 
@@ -536,7 +633,7 @@ resource "aws_api_gateway_rest_api" "main" {
 }
 
 
-
+# skipper server resource
 resource "aws_api_gateway_resource" "main" {
   rest_api_id = "${aws_api_gateway_rest_api.main.id}"
   parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
@@ -575,12 +672,117 @@ resource "aws_api_gateway_integration" "main" {
   connection_type = "VPC_LINK"
   connection_id   = "${aws_api_gateway_vpc_link.this.id}"
 }
-```
+
+
+
+# dataflow server resource
+resource "aws_api_gateway_resource" "dataflow" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  path_part   = "dataflow"
+}
+
+resource "aws_api_gateway_resource" "dataflow_proxy" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_resource.dataflow.id}"
+  path_part   = var.path_part
+}
+
+
+
+resource "aws_api_gateway_method" "dataflow" {
+  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
+  resource_id   = "${aws_api_gateway_resource.dataflow_proxy.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+}
+
+
+resource "aws_api_gateway_integration" "dataflow" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  resource_id = "${aws_api_gateway_resource.dataflow_proxy.id}"
+  http_method = "${aws_api_gateway_method.dataflow.http_method}"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+
+  type                    = var.integration_input_type
+  uri                     = "http://${var.nlb_dns_name}:9393/{proxy}"
+  integration_http_method = var.integration_http_method
+
+  connection_type = "VPC_LINK"
+  connection_id   = "${aws_api_gateway_vpc_link.this.id}"
+}
+
+
+
+
+# kafka_konsole resource
+resource "aws_api_gateway_resource" "kafka_konsole" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_rest_api.main.root_resource_id}"
+  path_part   = "kafka-konsole"
+}
+
+resource "aws_api_gateway_resource" "kafka_konsole_proxy" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  parent_id   = "${aws_api_gateway_resource.kafka_konsole.id}"
+  path_part   = var.path_part
+}
+
+
+
+resource "aws_api_gateway_method" "kafka_konsole" {
+  rest_api_id   = "${aws_api_gateway_rest_api.main.id}"
+  resource_id   = "${aws_api_gateway_resource.kafka_konsole_proxy.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+}
+
+
+resource "aws_api_gateway_integration" "kafka_konsole" {
+  rest_api_id = "${aws_api_gateway_rest_api.main.id}"
+  resource_id = "${aws_api_gateway_resource.kafka_konsole_proxy.id}"
+  http_method = "${aws_api_gateway_method.kafka_konsole.http_method}"
+
+  request_parameters = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+
+  type                    = var.integration_input_type
+  uri                     = "http://${var.nlb_dns_name}:8080/{proxy}"
+  integration_http_method = var.integration_http_method
+
+  connection_type = "VPC_LINK"
+  connection_id   = "${aws_api_gateway_vpc_link.this.id}"
+}
 
 
 
 
 
 
+resource "aws_api_gateway_deployment" "main" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name = "${var.environment}-env"
+  depends_on = [aws_api_gateway_integration.main]
+
+  variables = {
+    # just to trigger redeploy on resource changes
+    resources = join(", ", [aws_api_gateway_resource.main.id])
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 <!-- END_TF_DOCS -->
-

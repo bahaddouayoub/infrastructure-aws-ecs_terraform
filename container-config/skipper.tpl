@@ -1,5 +1,5 @@
-  [
-    {
+[     
+   {
       "name": "LANG",
       "value": "en_US.utf8"
     },
@@ -25,18 +25,18 @@
     },
     {
       "name": "SPRING_DATASOURCE_URL",
-      "value": "jdbc:postgresql://peaq-ock-db-server.cq9xxx88b4db.us-east-1.rds.amazonaws.com:5432/dataflow"
+      "value": "jdbc:postgresql://${rds_endpoint}/${db_name}"
     },
     {
       "name": "SPRING_DATASOURCE_USERNAME",
-      "value": "postgres"
+      "value": "${db_username}"
     },
     {
       "name": "SPRING_DATASOURCE_PASSWORD",
-      "value": "postgres123456"
+      "value": "${db_password}"
     },
     {
       "name": "SPRING_DATASOURCE_DRIVER_CLASS_NAME",
       "value": "org.postgresql.Driver"
     }
-  ]
+ ]

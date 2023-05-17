@@ -1,4 +1,5 @@
-[{
+[
+  {
     "name": "LANG",
     "value": "en_US.utf8"
   },
@@ -28,29 +29,30 @@
   },
   {
     "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS",
-    "value": "b-1.mskclusterdev.npyxhd.c4.kafka.us-east-1.amazonaws.com:9092"
+    "value": "${bootstrap_brokers}"
   },
   {
       "name": "SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS",
-      "value": "b-1.mskclusterdev.npyxhd.c4.kafka.us-east-1.amazonaws.com:9092"
+      "value": "${bootstrap_brokers}"
   },
   {
     "name": "SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",
     "value": "http://skipper-server:7578/api"
   },
   {
-    "name": "SPRING_DATASOURCE_URL",
-    "value": "jdbc:postgresql://peaq-ock-db-server.cq9xxx88b4db.us-east-1.rds.amazonaws.com:5432/dataflow"
-  },
-  {
-    "name": "SPRING_DATASOURCE_USERNAME",
-    "value": "postgres"
-  },
-  {
-    "name": "SPRING_DATASOURCE_PASSWORD",
-    "value": "postgres123456"
-  },
-  {
-    "name": "SPRING_DATASOURCE_DRIVER_CLASS_NAME",
-    "value": "org.postgresql.Driver"
-  }]
+      "name": "SPRING_DATASOURCE_URL",
+      "value": "jdbc:postgresql://${rds_endpoint}/${db_name}"
+    },
+    {
+      "name": "SPRING_DATASOURCE_USERNAME",
+      "value": "${db_username}"
+    },
+    {
+      "name": "SPRING_DATASOURCE_PASSWORD",
+      "value": "${db_password}"
+    },
+    {
+      "name": "SPRING_DATASOURCE_DRIVER_CLASS_NAME",
+      "value": "org.postgresql.Driver"
+    }
+]

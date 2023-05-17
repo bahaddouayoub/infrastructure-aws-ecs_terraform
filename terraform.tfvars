@@ -25,7 +25,7 @@ home_port_mapping                  = "dataflow-server"
 app_port_home                      = 9393
 tg_name_home                       = "dataflow-server-tg"
 security_group_ecs_tasks_name_home = "dataflow-server-task-sg"
-dataflow_env_file                  = "container-config/dataflow.json"
+dataflow_env_file                  = "container-config/dataflow.tpl"
 
 #skipper server config
 app_image_movie                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:skipper"
@@ -36,7 +36,7 @@ movie_port_mapping                  = "skipper-server"
 app_port_movie                      = 7577
 tg_name_movie                       = "skipper-server-tg"
 security_group_ecs_tasks_name_movie = "skipper-server-ecs-task-sg"
-skipper_env_file                    = "container-config/skipper.json"
+skipper_env_file                    = "container-config/skipper.tpl"
 
 
 #kafka-console server config
@@ -48,7 +48,7 @@ kafka_console_port_mapping                  = "kafka-console"
 app_port_kafka_console                      = 8080
 tg_name_kafka_console                       = "kafka-console-tg"
 security_group_ecs_tasks_name_kafka_console = "kafka console ecs task sg"
-kafka_console_env_file                      = "container-config/kafka-console.json"
+kafka_console_env_file                      = "container-config/kafka-console.tpl"
 
 
 
@@ -58,6 +58,7 @@ parameter_group_family          = "postgres14"
 db_username                     = "postgres"
 db_password                     = "postgres123456"
 db_port                         = 5432
+db_name                         = "dataflow"
 allocated_storage               = 100
 max_allocated_storage           = 500
 storage_type                    = "io1"

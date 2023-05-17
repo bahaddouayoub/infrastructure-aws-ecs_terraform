@@ -9,6 +9,12 @@ variable "db_username" {
   type        = string
 }
 
+variable "db_name" {
+  description = "RDS rdatabase name"
+  type        = string
+  default     = null
+}
+
 variable "vpc_id" {
   description = "AWS VPC Cider block for rds databases"
   type        = string
