@@ -13,6 +13,7 @@ module "vpc_for_ecs_fargate" {
   region                     = var.region
 }
 
+##
 #ECS cluster
 module "ecs_cluster" {
   source           = "./ecs-cluster"
@@ -161,4 +162,4 @@ module "rds_postgresql" {
   backup_retention_period         = var.backup_retention_period
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 }
-
+##
