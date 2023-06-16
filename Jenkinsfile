@@ -45,13 +45,13 @@ pipeline {
 
   stage('Push docker image') {
     steps {
-      withCredentials([usernamePassword(credentialsId: 'ecr-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-      sh "echo $PASS | docker login -u $USER --password-stdin"
+      
+      sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 858826120793.dkr.ecr.us-east-1.amazonaws.com"
       sh 'docker push 858826120793.dkr.ecr.us-east-1.amazonaws.comm/dataflow:dataflow'
       sh 'docker push 858826120793.dkr.ecr.us-east-1.amazonaws.com/skipper:skipper'
       sh 'docker push 858826120793.dkr.ecr.us-east-1.amazonaws.com/kafka-console:kafka-console'
       sh 'docker push 858826120793.dkr.ecr.us-east-1.amazonaws.com/app-stream:app-stream'
-      }
+      
     }
   }
   stage('Terraform Init') {
