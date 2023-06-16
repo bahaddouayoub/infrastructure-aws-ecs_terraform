@@ -25,14 +25,14 @@ pipeline {
     }
   }
 
-  stage('Create Repositories') {
-    steps {
-      sh 'aws ecr create-repository --repository-name dataflow --region us-east-1'
-      sh 'aws ecr create-repository --repository-name skipper --region us-east-1'
-      sh 'aws ecr create-repository --repository-name kafka-console --region us-east-1'
-      sh 'aws ecr create-repository --repository-name app-stream --region us-east-1'
-    }
-  }
+  // stage('Create Repositories') {
+  //   steps {
+  //     sh 'aws ecr create-repository --repository-name dataflow --region us-east-1'
+  //     sh 'aws ecr create-repository --repository-name skipper --region us-east-1'
+  //     sh 'aws ecr create-repository --repository-name kafka-console --region us-east-1'
+  //     sh 'aws ecr create-repository --repository-name app-stream --region us-east-1'
+  //   }
+  // }
 
   stage('Tage docker image') {
     steps {
