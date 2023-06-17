@@ -142,4 +142,25 @@ module "fargate_cluster_kafka" {
 # }
 
 
+# RDS postgresql
+module "rds_postgresql" {
+  source                          = "./rds-postgres"
+  subnet_ids                      = module.vpc_for_ecs_fargate.public_subnet_ids
+  vpc_id                          = module.vpc_for_ecs_fargate.vpc_id
+  parameter_group_name            = var.parameter_group_name
+  parameter_group_family          = var.parameter_group_family
+  param_log_statement             = var.param_log_statement
+  allocated_storage               = var.allocated_storage
+  max_allocated_storage           = var.max_allocated_storage
+  storage_type                    = var.storage_type
+  instance_class                  = var.instance_class
+  db_username                     = var.db_username
+  db_password                     = var.db_password
+  db_port                         = var.db_port
+  db_name                         = var.db_name
+  multi_az                        = var.multi_az
+  skip_final_snapshot             = var.skip_final_snapshot
+  backup_retention_period         = var.backup_retention_period
+  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
+}
 
