@@ -51,7 +51,7 @@ resource "aws_db_instance" "peaq_ock_db" {
 
   instance_class         = var.instance_class
   engine                 = "postgres"
-  engine_version         = "14.7"
+  # engine_version         = "14.7-R1"  
   publicly_accessible    = true
 
   username               = var.db_username
