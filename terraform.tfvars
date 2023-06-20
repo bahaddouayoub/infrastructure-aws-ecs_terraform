@@ -17,7 +17,7 @@ app_count        = "1"
 
 
 #dataflow server config
-app_image_home                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:dataflow"
+app_image_home                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/dataflow:dataflow"
 home_dns_name                      = "dataflow-server"
 home_family_name                   = "dataflow-server"
 home_container_name                = "dataflow-server"
@@ -28,7 +28,7 @@ security_group_ecs_tasks_name_home = "dataflow-server-task-sg"
 dataflow_env_file                  = "container-config/dataflow.tpl"
 
 #skipper server config
-app_image_movie                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:skipper"
+app_image_movie                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/skipper:skipper"
 movie_dns_name                      = "skipper-server"
 movie_family_name                   = "skipper-server"
 movie_container_name                = "skipper-server"
@@ -40,7 +40,7 @@ skipper_env_file                    = "container-config/skipper.tpl"
 
 
 #kafka-console server config
-app_image_kafka_console                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/my-repo:console"
+app_image_kafka_console                     = "163115913121.dkr.ecr.us-east-1.amazonaws.com/kafka-console:kafka-console"
 kafka_console_dns_name                      = "kafka-console"
 kafka_console_family_name                   = "kafka-console"
 kafka_console_container_name                = "kafka-console"
